@@ -3,8 +3,9 @@
 /**
  * "This is mine": the claim form for a found item.
  *
- * The claimant describes how they can show it's theirs (required),
- * and may add up to 3 proof images. The claim is created first; the images
+ * The claimant describes how they can show it's theirs (required), lists
+ * separate identifying details a guard can tick off one by one (optional,
+ * up to 5), and may add up to 3 proof images. The claim is created first; the images
  * are then uploaded one by one to that claim. If an image fails, the claim
  * still exists and the claimant can add it again from the claim page.
  */
@@ -20,6 +21,9 @@ import claimStyles from "./claim.module.css";
 
 const MAX_PROOFS = 3;
 const MIN_LENGTH = 1;
+// Same limits as the backend (ClaimIn in schemas/claim.py).
+const MAX_DETAILS = 5;
+const DETAIL_MAX_LENGTH = 200;
 
 export default function ClaimFormPage() {
   return (
@@ -35,6 +39,8 @@ function ClaimForm() {
   const [item, setItem] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [description, setDescription] = useState("");
+  const [details, setDetails] = useState([""]);
+  const [detailsError, setDetailsError] = useState("");
   const [files, setFiles] = useState([]); // [{ file, preview }]
   const [error, setError] = useState("");
   const [fieldError, setFieldError] = useState("");
@@ -65,17 +71,38 @@ function ClaimForm() {
     setFiles((current) => current.filter((_, i) => i !== index));
   }
 
+  function setDetail(index, value) {
+    setDetails((current) => current.map((d, i) => (i === index ? value : d)));
+  }
+
+  function removeDetail(index) {
+    setDetails((current) => (current.length === 1 ? [""] : current.filter((_, i) => i !== index)));
+  }
+
   async function submit(event) {
     event.preventDefault();
+    const filled = details.map((d) => d.trim()).filter(Boolean);
+    const unique = new Set(filled.map((d) => d.toLowerCase()));
+    let invalid = false;
     if (description.trim().length < MIN_LENGTH) {
       setFieldError("Please write something, so the guard can check it's yours.");
-      return;
+      invalid = true;
     }
+    if (unique.size !== filled.length) {
+      setDetailsError("Each detail should be different.");
+      invalid = true;
+    } else {
+      setDetailsError("");
+    }
+    if (invalid) return;
     setBusy(true);
     setError("");
     setFieldError("");
     try {
-      const claim = await apiFetch(`/items/${id}/claims`, { method: "POST", body: { description } });
+      const claim = await apiFetch(`/items/${id}/claims`, {
+        method: "POST",
+        body: { description, details: filled },
+      });
       let failed = 0;
       for (const { file } of files) {
         try {
@@ -88,6 +115,7 @@ function ClaimForm() {
     } catch (err) {
       setError(err.message);
       setFieldError(err.fieldErrors?.description || "");
+      setDetailsError(err.fieldErrors?.details || "");
       setBusy(false);
     }
   }
@@ -171,6 +199,46 @@ function ClaimForm() {
           />
           {fieldError && <span className="field-error">{fieldError}</span>}
         </div>
+
+        <fieldset className={`field ${claimStyles.details}`} aria-describedby="details-hint">
+          <legend>Identifying details (optional, but they help)</legend>
+          <span className="hint" id="details-hint">
+            One thing per line, so the guard can check each one against the item. For example: &quot;cat sticker on the
+            back&quot;, &quot;Rs 200 and a library card inside&quot;. Up to {MAX_DETAILS}.
+          </span>
+          <ol className={claimStyles.detailList}>
+            {details.map((detail, index) => (
+              <li key={index}>
+                <label className="visually-hidden" htmlFor={`detail-${index}`}>
+                  Detail {index + 1}
+                </label>
+                <input
+                  id={`detail-${index}`}
+                  type="text"
+                  maxLength={DETAIL_MAX_LENGTH}
+                  value={detail}
+                  onChange={(e) => setDetail(index, e.target.value)}
+                  aria-invalid={detailsError ? "true" : undefined}
+                />
+                {(details.length > 1 || detail) && (
+                  <button type="button" className="link-button" onClick={() => removeDetail(index)}>
+                    Remove<span className="visually-hidden"> detail {index + 1}</span>
+                  </button>
+                )}
+              </li>
+            ))}
+          </ol>
+          {details.length < MAX_DETAILS && (
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => setDetails((current) => [...current, ""])}
+            >
+              Add another detail
+            </button>
+          )}
+          {detailsError && <span className="field-error">{detailsError}</span>}
+        </fieldset>
 
         <div className="field">
           <label htmlFor="proofs">Proof images (optional)</label>

@@ -34,6 +34,11 @@ export default function ClaimList({ claims, staffView = false }) {
                 <>
                   {claim.claimant_name}
                   {claim.claimant_roll ? ` (${claim.claimant_roll})` : ""}.{" "}
+                  {claim.score !== null && claim.score !== undefined && (
+                    <span className={styles.scoreChip} title="Verification score C = 50M + 20R + 30H (advice only)">
+                      Score {claim.score.toFixed(1)}
+                    </span>
+                  )}{" "}
                 </>
               )}
               {claim.on_hold ? "Waiting: another claim is approved" : CLAIM_STATUS_LABELS[claim.status]}

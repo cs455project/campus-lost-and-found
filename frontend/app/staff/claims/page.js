@@ -8,7 +8,9 @@
  *   Ready to collect   approved, waiting for the owner (soonest deadline first)
  *   Closed             collected, rejected, withdrawn, expired or closed
  *
- * The tab and page number live in the address bar, like the Staff desk.
+ * The tab, sort order and page number live in the address bar, like the
+ * Staff desk. "Highest score first" orders by the verification score
+ * C = 50M + 20R + 30H: a way to prioritise, never a decision.
  */
 
 import Link from "next/link";
@@ -45,6 +47,7 @@ function ClaimsDesk() {
   const params = useSearchParams();
   const tab = TABS.find((t) => t.stage === params.get("stage")) || TABS[0];
   const page = Math.max(1, Number(params.get("page")) || 1);
+  const sort = params.get("sort") === "score" ? "score" : "oldest";
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
@@ -52,17 +55,18 @@ function ClaimsDesk() {
     let cancelled = false;
     setResult(null);
     setError("");
-    apiFetch("/staff/claims", { query: { stage: tab.stage, page, page_size: 20 } })
+    apiFetch("/staff/claims", { query: { stage: tab.stage, sort, page, page_size: 20 } })
       .then((data) => !cancelled && setResult(data))
       .catch((err) => !cancelled && setError(err.message));
     return () => {
       cancelled = true;
     };
-  }, [tab.stage, page]);
+  }, [tab.stage, sort, page]);
 
-  function hrefFor(stage, p = 1) {
+  function hrefFor(stage, p = 1, order = sort) {
     const next = new URLSearchParams();
     if (stage !== "review") next.set("stage", stage);
+    if (order === "score") next.set("sort", "score");
     if (p > 1) next.set("page", String(p));
     const text = next.toString();
     return text ? `${pathname}?${text}` : pathname;
@@ -82,6 +86,23 @@ function ClaimsDesk() {
           </Link>
         ))}
       </nav>
+
+      <p className={styles.sortRow}>
+        <span>Order:</span>{" "}
+        {[
+          { value: "oldest", label: tab.stage === "collect" ? "Default" : "Oldest first" },
+          { value: "score", label: "Highest score first" },
+        ].map((option) => (
+          <Link
+            key={option.value}
+            href={hrefFor(tab.stage, 1, option.value)}
+            className={styles.sortOption}
+            aria-current={sort === option.value ? "true" : undefined}
+          >
+            {option.label}
+          </Link>
+        ))}
+      </p>
 
       {error && (
         <div className="alert" role="alert">

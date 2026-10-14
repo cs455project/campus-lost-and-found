@@ -143,3 +143,38 @@
 .empty p {
   margin: 0 auto;
 }
+
+/* ---------- Claims desk: sort order and score ---------- */
+
+.sortRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  margin: 0.75rem 0;
+}
+
+.sortOption {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.sortOption[aria-current="true"] {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.scoreChip {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0 0.4rem;
+  border-radius: var(--radius-sm);
+  background: var(--brand-wash);
+  color: var(--brand-dark);
+}

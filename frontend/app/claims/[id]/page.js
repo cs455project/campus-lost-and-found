@@ -7,7 +7,9 @@
  *            description and proof, and the history. Can withdraw.
  *  Staff:    also the claimant's contact details, other claims on the
  *            same item, and the review buttons. Staff check the claimant's
- *            description against the item itself, which they're holding.
+ *            description against the item itself, which they're holding,
+ *            tick each identifying detail as matching or not, and see the
+ *            verification score C = 50M + 20R + 30H (advice, never a decision).
  *
  * The backend decides who sees what and sends can_* flags; this page only
  * shows the buttons it's told are allowed.
@@ -95,6 +97,16 @@ function ClaimDetail() {
       <section className={styles.panel} aria-labelledby="desc-heading">
         <h2 id="desc-heading">{claim.is_mine ? "What you told us" : "What the claimant says"}</h2>
         <p className={styles.description}>{claim.description}</p>
+        {!isStaffView && claim.details.length > 0 && (
+          <>
+            <h3 className={styles.subheading}>Identifying details</h3>
+            <ul className={styles.plainDetails}>
+              {claim.details.map((detail) => (
+                <li key={detail.id}>{detail.text}</li>
+              ))}
+            </ul>
+          </>
+        )}
         <Proofs claim={claim} onChanged={setClaim} />
       </section>
 
@@ -437,6 +449,10 @@ function StaffReview({ claim, onChanged }) {
         </div>
       </div>
 
+      <ScorePanel score={claim.score} />
+
+      <DetailChecks claim={claim} onChanged={onChanged} />
+
       {claim.other_claims.length > 0 && (
         <>
           <h3 className={styles.subheading}>Other claims on this item</h3>
@@ -452,6 +468,200 @@ function StaffReview({ claim, onChanged }) {
       )}
 
       <StaffActions claim={claim} onChanged={onChanged} />
+    </section>
+  );
+}
+
+/**
+ * C = 50M + 20R + 30H, with each part spelled out so a guard can see why.
+ * Advice only: it orders the review queue and never approves or rejects.
+ */
+function ScorePanel({ score }) {
+  if (!score) {
+    return (
+      <p className={styles.muted}>
+        No verification score: this claim was sent before scores existed.
+      </p>
+    );
+  }
+  const parts = [
+    {
+      key: "M",
+      label: "Details matched",
+      value: score.m,
+      explain: `${score.matched} of ${score.total} detail${score.total === 1 ? "" : "s"} marked as matching`,
+    },
+    { key: "R", label: "Claimed soon after the find", value: score.r, explain: "1 on the same day, 0 after 30 days" },
+    { key: "H", label: "Claimant's verified returns", value: score.h, explain: "items they found and handed in, up to 3" },
+  ];
+  return (
+    <section className={styles.score} aria-labelledby="score-heading">
+      <div className={styles.scoreTotal}>
+        <h3 id="score-heading" className={styles.subheading}>
+          Verification score
+        </h3>
+        <p>
+          <span className={styles.scoreNumber}>{score.score.toFixed(1)}</span>
+          <span className={styles.muted}> / 100</span>
+        </p>
+      </div>
+      <table className={styles.scoreTable}>
+        <caption className="visually-hidden">How the score is worked out</caption>
+        <thead>
+          <tr>
+            <th scope="col">Part</th>
+            <th scope="col">Value</th>
+            <th scope="col">Weight</th>
+            <th scope="col">Points</th>
+          </tr>
+        </thead>
+        <tbody>
+          {parts.map((part) => (
+            <tr key={part.key}>
+              <th scope="row">
+                {part.key}: {part.label}
+                <span className={styles.muted}> ({part.explain})</span>
+              </th>
+              <td>{part.value.toFixed(2)}</td>
+              <td>× {score.weights[part.key]}</td>
+              <td>{(part.value * score.weights[part.key]).toFixed(1)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className={styles.muted}>
+        Advice only: it puts likely owners first in the queue. It doesn&apos;t decide ownership; you do, after checking
+        the item and the ID card.
+      </p>
+    </section>
+  );
+}
+
+const VERDICT_WORDS = { MATCH: "Matches", NO_MATCH: "Doesn't match" };
+
+/** Each identifying detail, with Matches / Doesn't match buttons while reviewing. */
+function DetailChecks({ claim, onChanged }) {
+  const [busy, setBusy] = useState(null); // detail id, or "desk"
+  const [error, setError] = useState("");
+  const [deskText, setDeskText] = useState("");
+  const [deskVerdict, setDeskVerdict] = useState("MATCH");
+  const canCheck = claim.can_check_details;
+
+  async function setVerdict(detailId, verdict) {
+    setBusy(detailId);
+    setError("");
+    try {
+      onChanged(
+        await apiFetch(`/staff/claims/${claim.id}/details/${detailId}`, { method: "PUT", body: { verdict } }),
+      );
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function addDesk(event) {
+    event.preventDefault();
+    if (!deskText.trim()) return;
+    setBusy("desk");
+    setError("");
+    try {
+      onChanged(
+        await apiFetch(`/staff/claims/${claim.id}/details`, {
+          method: "POST",
+          body: { text: deskText, verdict: deskVerdict },
+        }),
+      );
+      setDeskText("");
+    } catch (err) {
+      setError(err.fieldErrors?.text || err.message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <section aria-labelledby="details-heading">
+      <h3 id="details-heading" className={styles.subheading}>
+        Identifying details
+      </h3>
+      {error && (
+        <div className="alert" role="alert">
+          {error}
+        </div>
+      )}
+      {claim.details.length === 0 ? (
+        <p className={styles.muted}>The claimant didn&apos;t list separate details. Use the description below.</p>
+      ) : (
+        <ul className={styles.detailChecks}>
+          {claim.details.map((detail) => (
+            <li key={detail.id} data-verdict={detail.verdict || "UNCHECKED"}>
+              <div>
+                <span>{detail.text}</span>
+                {detail.source === "DESK" && <span className={styles.muted}> (told at the office)</span>}
+                <br />
+                <span className={styles.muted}>
+                  {detail.verdict
+                    ? `${VERDICT_WORDS[detail.verdict]}, checked by ${detail.checked_by_name || "a guard"}`
+                    : "Not checked yet"}
+                </span>
+              </div>
+              {canCheck && (
+                <div className={styles.verdictButtons} role="group" aria-label={`Check: ${detail.text}`}>
+                  {["MATCH", "NO_MATCH"].map((verdict) => (
+                    <button
+                      key={verdict}
+                      type="button"
+                      className={`button ${detail.verdict === verdict ? "" : "button-secondary"}`}
+                      aria-pressed={detail.verdict === verdict}
+                      disabled={busy !== null}
+                      onClick={() => setVerdict(detail.id, detail.verdict === verdict ? null : verdict)}
+                    >
+                      {VERDICT_WORDS[verdict]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {!canCheck && claim.status === "SUBMITTED" && (
+        <p className={styles.muted}>Start the review to check details.</p>
+      )}
+      {canCheck && (
+        <form className={styles.deskForm} onSubmit={addDesk}>
+          <div className="field">
+            <label htmlFor="desk-detail">Record a detail the claimant told you in person</label>
+            <input
+              id="desk-detail"
+              type="text"
+              maxLength={200}
+              value={deskText}
+              onChange={(e) => setDeskText(e.target.value)}
+            />
+          </div>
+          <fieldset className={styles.deskVerdict}>
+            <legend className="visually-hidden">Does it match the item?</legend>
+            {["MATCH", "NO_MATCH"].map((verdict) => (
+              <label key={verdict}>
+                <input
+                  type="radio"
+                  name="desk-verdict"
+                  value={verdict}
+                  checked={deskVerdict === verdict}
+                  onChange={() => setDeskVerdict(verdict)}
+                />{" "}
+                {VERDICT_WORDS[verdict]}
+              </label>
+            ))}
+          </fieldset>
+          <button type="submit" className="button button-secondary" disabled={busy !== null || !deskText.trim()}>
+            {busy === "desk" ? "Saving…" : "Add detail"}
+          </button>
+        </form>
+      )}
     </section>
   );
 }

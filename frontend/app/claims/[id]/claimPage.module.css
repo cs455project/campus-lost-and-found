@@ -278,3 +278,112 @@
 .idCheck input {
   margin-top: 0.3rem;
 }
+
+/* ---------- Identifying details ---------- */
+
+.plainDetails {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.detailChecks {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.detailChecks li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--rule);
+  border-radius: var(--radius-sm);
+}
+
+.detailChecks li + li {
+  margin-top: 0.5rem;
+}
+
+.detailChecks li[data-verdict="MATCH"] {
+  border-left-color: var(--found);
+  background: var(--found-wash);
+}
+
+.detailChecks li[data-verdict="NO_MATCH"] {
+  border-left-color: var(--lost);
+  background: var(--lost-wash);
+}
+
+.verdictButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.deskForm {
+  border-top: 1px dashed var(--line);
+  padding-top: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.deskVerdict {
+  border: 0;
+  padding: 0;
+  margin: 0 0 0.75rem;
+  display: flex;
+  gap: 1.25rem;
+}
+
+/* ---------- Verification score ---------- */
+
+.score {
+  background: var(--brand-wash);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+.scoreTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.scoreTotal p {
+  margin: 0;
+}
+
+.scoreNumber {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.scoreTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  margin: 0.5rem 0;
+}
+
+.scoreTable th,
+.scoreTable td {
+  text-align: left;
+  padding: 0.3rem 0.5rem 0.3rem 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+.scoreTable td {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.scoreTable tbody th {
+  font-weight: 600;
+}

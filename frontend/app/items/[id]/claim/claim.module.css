@@ -61,3 +61,29 @@
 .whatNext li + li {
   margin-top: 0.25rem;
 }
+
+/* Identifying details: one input per detail, with its remove button. */
+.details {
+  border: 0;
+  padding: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.detailList {
+  list-style: none;
+  margin: 0.5rem 0 0.75rem;
+  padding: 0;
+}
+
+.detailList li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.detailList input {
+  flex: 1;
+  min-width: 0;
+}

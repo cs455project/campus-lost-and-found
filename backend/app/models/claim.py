@@ -88,6 +88,10 @@ class Claim(TimestampMixin, Base):
     proofs: Mapped[list["ClaimProof"]] = relationship(
         back_populates="claim", order_by="ClaimProof.id", cascade="all, delete-orphan", passive_deletes=True
     )
+    # Identifying details (FR-CLM-02), each checked by a guard against the item.
+    details: Mapped[list["ClaimDetail"]] = relationship(
+        back_populates="claim", order_by="ClaimDetail.id", cascade="all, delete-orphan", passive_deletes=True
+    )
 
     __table_args__ = (
         # At most ONE approved claim per item: the database itself refuses a
@@ -138,4 +142,50 @@ class ClaimProof(Base):
     stored_name: Mapped[str] = mapped_column(String(80), unique=True)
     content_type: Mapped[str] = mapped_column(String(30))
     size_bytes: Mapped[int]
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class DetailVerdict(enum.StrEnum):
+    MATCH = "MATCH"  # the guard checked the item: this detail is true
+    NO_MATCH = "NO_MATCH"  # the guard checked the item: this detail is wrong
+
+
+class DetailSource(enum.StrEnum):
+    CLAIMANT = "CLAIMANT"  # written by the claimant on the claim form
+    DESK = "DESK"  # told to a guard in person and recorded at the office
+
+
+MAX_DETAILS = 5
+CHECKABLE_STATUSES = [ClaimStatus.UNDER_REVIEW, ClaimStatus.NEEDS_MORE_INFO]
+
+
+class ClaimDetail(Base):
+    """One identifying detail the claimant remembers about the item, e.g.
+    "name written inside the front pocket" (FR-CLM-02).
+
+    Private (FR-CLM-03, FR-CLM-11): only the claimant and staff can read the
+    text, and only staff see the verdict. A guard compares each detail with
+    the item they are holding and records MATCH or NO_MATCH. The fraction of
+    matches is M in the verification score (services/verification_score.py).
+    """
+
+    __tablename__ = "claim_details"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    claim_id: Mapped[int] = mapped_column(ForeignKey("claims.id", ondelete="CASCADE"), index=True)
+    claim: Mapped[Claim] = relationship(back_populates="details")
+    source: Mapped[DetailSource] = mapped_column(
+        Enum(DetailSource, name="claim_detail_source", native_enum=False, create_constraint=True,
+             length=8, validate_strings=True),
+        default=DetailSource.CLAIMANT,
+    )
+    text: Mapped[str] = mapped_column(String(200))
+    # NULL until a guard has checked it.
+    verdict: Mapped[DetailVerdict | None] = mapped_column(
+        Enum(DetailVerdict, name="claim_detail_verdict", native_enum=False, create_constraint=True,
+             length=8, validate_strings=True)
+    )
+    checked_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    checked_by: Mapped[User | None] = relationship()
+    checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -16,7 +16,16 @@ from fastapi.responses import FileResponse
 from app.core.deps import DbSession, OnboardedUser, StaffUser
 from app.core.errors import not_found
 from app.models import ClaimProof
-from app.schemas.claim import ClaimIn, ClaimOut, ClaimPage, HandOverIn, OptionalNoteIn, RequiredNoteIn
+from app.schemas.claim import (
+    ClaimIn,
+    ClaimOut,
+    ClaimPage,
+    DeskDetailIn,
+    DetailVerdictIn,
+    HandOverIn,
+    OptionalNoteIn,
+    RequiredNoteIn,
+)
 from app.services import claims
 from app.services import items as items_service
 from app.services import storage
@@ -32,9 +41,10 @@ PageSize = Annotated[int, Query(ge=1, le=50)]
 
 @router.post("/items/{item_id}/claims", response_model=ClaimOut, status_code=status.HTTP_201_CREATED)
 def submit_claim(item_id: int, data: ClaimIn, user: OnboardedUser, db: DbSession):
-    """"This is mine": start a claim on a found item held at an office."""
+    """"This is mine": start a claim on a found item held at an office.
+    `details` (up to 5) are separate identifying details a guard will check."""
     item = items_service.get_visible_item(db, item_id, user)
-    claim = claims.submit(db, item, user, data.description)
+    claim = claims.submit(db, item, user, data.description, data.details)
     return claims.detail_for(db, claim, user)
 
 
@@ -140,4 +150,21 @@ def hand_over(claim_id: int, data: HandOverIn, user: StaffUser, db: DbSession):
     name and roll number. The return time is taken from the server clock."""
     claim = claims.get_claim(db, claim_id, user)
     claims.hand_over(db, claim, user, data.note)
+    return claims.detail_for(db, claim, user)
+
+
+@router.put("/staff/claims/{claim_id}/details/{detail_id}", response_model=ClaimOut)
+def check_detail(claim_id: int, detail_id: int, data: DetailVerdictIn, user: StaffUser, db: DbSession):
+    """Record whether one identifying detail matches the item (MATCH /
+    NO_MATCH), or clear the check (null). Only while under review."""
+    claim = claims.get_claim(db, claim_id, user)
+    claims.check_detail(db, claim, user, detail_id, data.verdict)
+    return claims.detail_for(db, claim, user)
+
+
+@router.post("/staff/claims/{claim_id}/details", response_model=ClaimOut, status_code=status.HTTP_201_CREATED)
+def add_desk_detail(claim_id: int, data: DeskDetailIn, user: StaffUser, db: DbSession):
+    """Record a detail the claimant told a guard in person, with its verdict."""
+    claim = claims.get_claim(db, claim_id, user)
+    claims.add_desk_detail(db, claim, user, data.text, data.verdict)
     return claims.detail_for(db, claim, user)

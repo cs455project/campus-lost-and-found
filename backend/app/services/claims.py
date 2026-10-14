@@ -27,16 +27,20 @@ from app.core.errors import bad_request, conflict, forbidden, not_found
 from app.models import (
     OPEN_CLAIM_STATUSES,
     Claim,
+    ClaimDetail,
     ClaimEvent,
     ClaimProof,
     ClaimStatus,
     CustodyEvent,
     CustodyEventType,
+    DetailSource,
+    DetailVerdict,
     Item,
     ItemKind,
     ItemStatus,
     User,
 )
+from app.models.claim import CHECKABLE_STATUSES, MAX_DETAILS
 from app.models.item import HELD_STATUSES
 from app.services import email as email_service
 from app.services import storage
@@ -154,7 +158,7 @@ def get_claim(db: Session, claim_id: int, user: User) -> Claim:
 # ---------------- Claimant actions ----------------
 
 
-def submit(db: Session, item: Item, user: User, description: str) -> Claim:
+def submit(db: Session, item: Item, user: User, description: str, details: list[str] | None = None) -> Claim:
     lock_item(db, item)  # the item may be disposed of or returned at this moment
     if user.is_staff:
         raise forbidden("Security staff can't claim items. Sign in with a student account.")
@@ -166,6 +170,7 @@ def submit(db: Session, item: Item, user: User, description: str) -> Claim:
         raise conflict("You already have an open claim on this item.")
 
     claim = Claim(item=item, claimant=user, description=description, status=S.SUBMITTED)
+    claim.details = [ClaimDetail(text=text, source=DetailSource.CLAIMANT) for text in (details or [])[:MAX_DETAILS]]
     db.add(claim)
     db.add(ClaimEvent(claim=claim, from_status=None, to_status=S.SUBMITTED, actor=user))
     _sync_item(db, item)
@@ -201,6 +206,49 @@ def add_proof(db: Session, claim: Claim, user: User, data: bytes, content_type: 
         storage.delete(stored, folder="proofs")
         raise
     db.refresh(claim)
+
+
+# ---------------- Identifying details (guard checks) ----------------
+
+
+def can_check_details(claim: Claim, user: User) -> bool:
+    """Staff record checks only while actually reviewing: after "Start
+    review", or after asking for an office visit. Never once decided."""
+    return user.is_staff and claim.status in CHECKABLE_STATUSES
+
+
+def _require_checkable(claim: Claim, user: User) -> None:
+    if not can_check_details(claim, user):
+        raise forbidden("Details can only be checked while the claim is under review.")
+
+
+def check_detail(db: Session, claim: Claim, staff: User, detail_id: int, verdict: DetailVerdict | None) -> Claim:
+    """A guard compares one detail with the item: MATCH, NO_MATCH, or clear (None)."""
+    lock_claim(db, claim)
+    _require_checkable(claim, staff)
+    detail = db.get(ClaimDetail, detail_id)
+    if detail is None or detail.claim_id != claim.id:
+        raise not_found("No detail with that number on this claim.")
+    detail.verdict = verdict
+    detail.checked_by = staff if verdict else None
+    detail.checked_at = now() if verdict else None
+    db.commit()
+    db.refresh(claim)
+    return claim
+
+
+def add_desk_detail(db: Session, claim: Claim, staff: User, text: str, verdict: DetailVerdict) -> Claim:
+    """The claimant explained something in person; the guard records it
+    together with what they found on the item."""
+    lock_claim(db, claim)
+    _require_checkable(claim, staff)
+    if len(claim.details) >= MAX_DETAILS * 2:
+        raise bad_request("This claim already has the maximum number of details.")
+    db.add(ClaimDetail(claim=claim, source=DetailSource.DESK, text=text, verdict=verdict,
+                       checked_by=staff, checked_at=now()))
+    db.commit()
+    db.refresh(claim)
+    return claim
 
 
 def withdraw(db: Session, claim: Claim, user: User) -> Claim:
@@ -357,6 +405,14 @@ def detail_for(db: Session, claim: Claim, user: User) -> dict:
         "description": claim.description,
         "item": claim.item,
         "proof_ids": [p.id for p in claim.proofs],
+        # The claimant sees their own details, but never the guard's verdicts.
+        "details": [
+            {"id": d.id, "text": d.text, "source": d.source,
+             "verdict": d.verdict if staff else None,
+             "checked_by_name": d.checked_by.full_name if staff and d.checked_by else None,
+             "checked_at": d.checked_at if staff else None}
+            for d in claim.details
+        ],
         "staff_message": claim.staff_message,
         "created_at": claim.created_at,
         "approved_at": claim.approved_at,
@@ -379,6 +435,7 @@ def detail_for(db: Session, claim: Claim, user: User) -> dict:
         "can_approve": staff_can(S.APPROVED) and approved_other is None,
         "can_reject": staff_can(S.REJECTED),
         "can_hand_over": staff_can(S.COLLECTED),
+        "can_check_details": can_check_details(claim, user),
     }
 
 

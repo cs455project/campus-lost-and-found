@@ -5,7 +5,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.models import ClaimStatus
+from app.models import ClaimStatus, DetailSource, DetailVerdict
+from app.models.claim import MAX_DETAILS
 from app.schemas.item import PersonBrief, _tidy
 from app.schemas.reference import CategoryOut, OfficeOut
 
@@ -17,14 +18,62 @@ def _strip(value):
 # ---------------- Incoming ----------------
 
 
+DETAIL_MAX_LENGTH = 200
+
+
+def _clean_detail(value):
+    value = _strip(value)
+    if not isinstance(value, str) or not value:
+        raise ValueError("A detail can't be blank.")
+    if len(value) > DETAIL_MAX_LENGTH:
+        raise ValueError(f"Keep each detail under {DETAIL_MAX_LENGTH} characters.")
+    return value
+
+
 class ClaimIn(BaseModel):
     # At least 1 character; the more detail (what's inside, marks...), the better.
     description: str = Field(min_length=1, max_length=2000)
+    # FR-CLM-02: separate things only the owner would know, e.g. "sticker of a
+    # cat on the back", "Rs 200 and a library card inside". A guard checks each
+    # one against the item. Optional for backward compatibility, but claims
+    # without details score 0 for M (see services/verification_score.py).
+    details: list[str] = Field(default_factory=list, max_length=MAX_DETAILS)
 
     @field_validator("description", mode="before")
     @classmethod
     def strip(cls, value):
         return _strip(value)
+
+    @field_validator("details", mode="before")
+    @classmethod
+    def clean_details(cls, value):
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            return value  # pydantic reports the type error
+        cleaned = [_clean_detail(v) for v in value]
+        if len({v.casefold() for v in cleaned}) != len(cleaned):
+            raise ValueError("Each detail should be different.")
+        return cleaned
+
+
+class DetailVerdictIn(BaseModel):
+    """A guard's check of one detail. null clears a mistaken check."""
+
+    verdict: DetailVerdict | None
+
+
+class DeskDetailIn(BaseModel):
+    """A detail the claimant told a guard in person (office visit), recorded
+    with the guard's verdict straight away (FR-CUS-06)."""
+
+    text: str
+    verdict: DetailVerdict
+
+    @field_validator("text", mode="before")
+    @classmethod
+    def clean(cls, value):
+        return _clean_detail(value)
 
 
 class OptionalNoteIn(BaseModel):
@@ -80,6 +129,16 @@ class ClaimEventOut(BaseModel):
     created_at: datetime
 
 
+class ClaimDetailOut(BaseModel):
+    id: int
+    text: str
+    source: DetailSource
+    # ---- Staff only (null for the claimant) ----
+    verdict: DetailVerdict | None
+    checked_by_name: str | None
+    checked_at: datetime | None
+
+
 class ClaimantOut(PersonBrief):
     phone: str | None
 
@@ -99,6 +158,7 @@ class ClaimOut(BaseModel):
     description: str
     item: ClaimItemBrief
     proof_ids: list[int]
+    details: list[ClaimDetailOut]
     staff_message: str | None
     created_at: datetime
     approved_at: datetime | None
@@ -120,6 +180,8 @@ class ClaimOut(BaseModel):
     can_approve: bool
     can_reject: bool
     can_hand_over: bool
+    # Record MATCH / NO_MATCH on details (while under review or after a visit).
+    can_check_details: bool
 
 
 class ClaimRowOut(BaseModel):

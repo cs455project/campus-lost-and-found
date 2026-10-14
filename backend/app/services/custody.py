@@ -32,6 +32,7 @@ from app.models.item import HELD_STATUSES
 from app.schemas.staff import DisposeIn, ReceiveIn, TransferIn, WalkInIn
 from app.services import items as items_service
 from app.services import matching
+from app.services.locks import lock_item
 
 CLOSED_STATUSES = [ItemStatus.RETURNED, ItemStatus.DISPOSED, ItemStatus.DONATED]
 
@@ -94,7 +95,10 @@ def _log(db: Session, item: Item, event_type: CustodyEventType, actor: User,
 
 
 def receive_item(db: Session, item: Item, actor: User, data: ReceiveIn) -> Item:
-    """A finder hands in an item they reported online."""
+    """A finder hands in an item they reported online. Locked, so two guards
+    pressing Receive together (or the finder cancelling at the same moment)
+    can't both succeed: the second sees the new status and is refused."""
+    lock_item(db, item)
     _require(can_receive(item, actor), "Only found items waiting for drop-off can be received.")
     office = _open_office(db, data.office_id)
 
@@ -139,6 +143,7 @@ def register_walk_in(db: Session, actor: User, data: WalkInIn) -> Item:
 
 def transfer(db: Session, item: Item, actor: User, data: TransferIn) -> Item:
     """Move an item between offices, e.g. a sub-office sends it to the main office."""
+    lock_item(db, item)  # a claim may arrive at the same moment
     _require(can_transfer(item, actor), "Only items at an office with no claim in progress can be moved.")
     to_office = _open_office(db, data.to_office_id)
     from_office = item.current_office
@@ -154,6 +159,7 @@ def transfer(db: Session, item: Item, actor: User, data: TransferIn) -> Item:
 
 def dispose(db: Session, item: Item, actor: User, data: DisposeIn) -> Item:
     """Unclaimed item thrown away or donated. Final: it leaves the Found page."""
+    lock_item(db, item)  # never dispose of an item someone has just claimed
     _require(can_dispose(item, actor), "Only unclaimed items at an office can be disposed of or donated.")
     from_office = item.current_office
     event_type = CustodyEventType(data.outcome)

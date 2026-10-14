@@ -31,6 +31,7 @@ from app.models import (
 from app.models.item import HELD_STATUSES, PUBLIC_STATUSES
 from app.schemas.item import CloseLostIn, FoundItemIn, LostItemIn
 from app.services import matching, storage
+from app.services.locks import lock_item
 
 MAX_DAYS_AGO = 365  # reports about things lost more than a year ago are refused
 
@@ -251,6 +252,7 @@ def close_lost(db: Session, item: Item, user: User, data: CloseLostIn) -> Item:
 
 
 def change_dropoff(db: Session, item: Item, user: User, office_id: int) -> Item:
+    lock_item(db, item)  # a guard may be receiving it right now
     if not can_change_dropoff(item, user):
         raise forbidden("You can only change the office before you hand the item in.")
     _check_office(db, office_id)
@@ -262,6 +264,7 @@ def change_dropoff(db: Session, item: Item, user: User, office_id: int) -> Item:
 def cancel_found(db: Session, item: Item, user: User) -> None:
     """Delete a found report that was never handed in. Nothing else points
     at it yet (claims only start once a guard holds the item)."""
+    lock_item(db, item)  # a guard may be receiving it right now
     if not can_cancel(item, user):
         raise forbidden("You can only cancel a found report before you hand the item in.")
     item_id = item.id
@@ -276,6 +279,7 @@ def cancel_found(db: Session, item: Item, user: User) -> None:
 def update_report(db: Session, item: Item, user: User, data: LostItemIn) -> Item:
     """The reporter corrects their report. The same checks as reporting apply.
     (The search text updates by itself: it's a generated column.)"""
+    lock_item(db, item)  # a guard may be receiving it right now
     if not can_edit(item, user):
         raise forbidden("You can only edit your own report while it's still open "
                         "(for found items: before you hand it in).")

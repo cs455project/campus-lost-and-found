@@ -17,6 +17,9 @@ from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.models import Category, Office
 
+# Categories whose found items must always go to the SIS Guard (BR-02).
+CUSTODY_REQUIRED = {"cycle"}
+
 # (name, slug) in the order they should appear in the filter.
 CATEGORIES = [
     ("Electronics", "electronics"),
@@ -55,12 +58,16 @@ OFFICES = [
 
 
 def seed_categories(db: Session) -> int:
-    existing = set(db.scalars(select(Category.name)))
+    existing = {category.name: category for category in db.scalars(select(Category))}
     added = 0
     for position, (name, slug) in enumerate(CATEGORIES, start=1):
+        required = slug in CUSTODY_REQUIRED
         if name not in existing:
-            db.add(Category(name=name, slug=slug, sort_order=position * 10))
+            db.add(Category(name=name, slug=slug, sort_order=position * 10, custody_required=required))
             added += 1
+        elif required and not existing[name].custody_required:
+            # Older databases: switch the rule on for existing rows too.
+            existing[name].custody_required = True
     return added
 
 

@@ -20,3 +20,5 @@ class CategoryOut(BaseModel):
     id: int
     name: str
     slug: str
+    # True: found items in this category always go to the SIS Guard (e.g. bicycles).
+    custody_required: bool = False

@@ -71,6 +71,22 @@ def _check_office(db: Session, office_id: int) -> None:
         raise bad_request("Choose an open security office.")
 
 
+GUARD_TRACK = "GUARD"
+
+
+def custody_track_for(category: Category) -> str:
+    """Which custody track a new found report uses (US-13, FR-CUS-01/02/08).
+
+    Categories marked custody_required (bicycles, BR-02) must always use the
+    SIS Guard track. Every other category also uses it for now: the finder
+    names the security office they will hand the item to, and the report
+    waits in AWAITING_DROPOFF (the D1 "AWAITING_DEPOSIT" state) until a guard
+    confirms receipt. When the direct-handover track (US-10/11) is added, it
+    must call this function and refuse DIRECT for custody_required categories.
+    """
+    return GUARD_TRACK
+
+
 def report_found(db: Session, user: User, data: FoundItemIn) -> Item:
     _check_common(db, data)
     _check_office(db, data.dropoff_office_id)
@@ -88,6 +104,9 @@ def report_found(db: Session, user: User, data: FoundItemIn) -> Item:
         # (The description is the report's plus the finder's optional note.)
         fields.update(title=lost.title, category_id=lost.category_id, colour=lost.colour, brand=lost.brand)
 
+    # Guard track: the item waits for the finder to hand it in at an office.
+    if custody_track_for(db.get(Category, fields["category_id"])) != GUARD_TRACK:
+        raise bad_request("Only the security-office track is available for found items.")
     item = Item(
         kind=ItemKind.FOUND,
         # Not shown publicly until a guard confirms they have it.

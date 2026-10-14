@@ -97,12 +97,14 @@ def staff_claims(
     user: StaffUser,
     db: DbSession,
     stage: Literal["review", "visit", "collect", "closed"] = "review",
+    sort: Literal["oldest", "score"] = "oldest",
     page: PageNumber = 1,
     page_size: PageSize = 20,
 ):
     """review = new or being reviewed; visit = waiting for an office visit;
-    collect = approved, waiting for collection; closed = finished."""
-    return claims.list_for_staff(db, stage, page, page_size)
+    collect = approved, waiting for collection; closed = finished.
+    sort=score puts the highest verification score first (advisory only)."""
+    return claims.list_for_staff(db, stage, page, page_size, sort)
 
 
 @router.post("/staff/claims/{claim_id}/start-review", response_model=ClaimOut)

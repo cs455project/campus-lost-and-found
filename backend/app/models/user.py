@@ -3,7 +3,7 @@ told apart by their role."""
 
 import enum
 
-from sqlalchemy import Boolean, CheckConstraint, Enum, ForeignKey, String, true
+from sqlalchemy import Boolean, CheckConstraint, Enum, ForeignKey, Integer, String, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -58,10 +58,17 @@ class User(TimestampMixin, Base):
     # Deactivate instead of deleting, so their reports and history stay intact.
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
 
+    # How many items this person found and handed in that a guard later
+    # returned to their verified owner. Counted at hand-over, and kept even
+    # after the returned record is purged (60 days). H in the verification
+    # score (services/verification_score.py).
+    verified_returns: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+
     __table_args__ = (
         # The database itself rejects mixed-case emails, as a safety net in
         # case some code forgets to lowercase before saving.
         CheckConstraint("email = lower(email)", name="email_lowercase"),
+        CheckConstraint("verified_returns >= 0", name="verified_returns_not_negative"),
     )
 
     @property

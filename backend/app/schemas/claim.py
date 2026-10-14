@@ -139,6 +139,21 @@ class ClaimDetailOut(BaseModel):
     checked_at: datetime | None
 
 
+class ScoreOut(BaseModel):
+    """C = 50M + 20R + 30H (staff only). Advisory: it orders the review
+    queue and never decides ownership (FR-SCORE-04)."""
+
+    score: float
+    m: float
+    r: float
+    h: float
+    matched: int  # details a guard marked MATCH
+    checked: int  # details a guard has checked either way
+    total: int  # all details on the claim
+    weights: dict[str, int]
+    scored_at: datetime | None
+
+
 class ClaimantOut(PersonBrief):
     phone: str | None
 
@@ -182,6 +197,7 @@ class ClaimOut(BaseModel):
     can_hand_over: bool
     # Record MATCH / NO_MATCH on details (while under review or after a visit).
     can_check_details: bool
+    score: ScoreOut | None
 
 
 class ClaimRowOut(BaseModel):
@@ -197,6 +213,7 @@ class ClaimRowOut(BaseModel):
     updated_at: datetime
     collect_by: datetime | None
     on_hold: bool
+    score: float | None  # staff lists only
 
 
 class ClaimPage(BaseModel):

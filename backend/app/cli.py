@@ -6,6 +6,9 @@ Make someone the admin:
 Create sample items to try the Found/Lost pages and page numbers:
     python -m app.cli demo-items --count 30
 
+Give a verification score to claims sent before scores existed:
+    python -m app.cli rescore-claims
+
 Timed jobs (reminders, claim expiry, clean-up) are run by the worker:
     python -m app.worker
 
@@ -19,11 +22,12 @@ from datetime import timedelta
 
 from sqlalchemy import select
 
-from app.core.clock import now, today
+from app.core.clock import local, now, today
 from app.core.database import SessionLocal
 from app.core.errors import AppError
 from app.models import (
     Category,
+    Claim,
     CustodyEvent,
     CustodyEventType,
     Item,
@@ -33,6 +37,7 @@ from app.models import (
     User,
     UserRole,
 )
+from app.services import verification_score
 from app.services.auth import check_staff_email, normalize_email
 
 
@@ -107,6 +112,23 @@ def demo_items(count: int) -> None:
     print(f"Created {count} demo items (about two thirds found, one third lost).")
 
 
+def rescore_claims(only_ids: list[int] | None = None) -> int:
+    """Score every claim that has no score yet (sent before US-22 existed).
+    R uses the date the claim was sent; H uses the claimant's count today.
+    Claims that already have a score are left alone, so it's safe to re-run."""
+    with SessionLocal() as db, db.begin():
+        query = select(Claim).where(Claim.score.is_(None))
+        if only_ids is not None:  # tests: touch only their own claims
+            query = query.where(Claim.id.in_(only_ids))
+        unscored = list(db.scalars(query))
+        for claim in unscored:
+            verification_score.score_new_claim(
+                claim, claim.item.happened_on, local(claim.created_at).date(), claim.claimant.verified_returns
+            )
+    print(f"Scored {len(unscored)} claim(s).")
+    return len(unscored)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -117,12 +139,16 @@ def main() -> None:
     demo_cmd = commands.add_parser("demo-items", help="create sample items")
     demo_cmd.add_argument("--count", type=int, default=30)
 
+    commands.add_parser("rescore-claims", help="give a verification score to older claims")
+
     args = parser.parse_args()
     try:
         if args.command == "make-admin":
             make_admin(args.email)
         elif args.command == "demo-items":
             demo_items(args.count)
+        elif args.command == "rescore-claims":
+            rescore_claims()
     except AppError as error:
         raise SystemExit(f"Error: {error.message}")
 

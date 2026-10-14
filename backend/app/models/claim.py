@@ -15,7 +15,7 @@ make each move):
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Text, func, text
+from sqlalchemy import CheckConstraint, DateTime, Enum, Float, ForeignKey, Index, String, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
@@ -82,6 +82,15 @@ class Claim(TimestampMixin, Base):
     collect_reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     review_reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
+    # ---- Verification score C = 50M + 20R + 30H (US-22) ----
+    # Staff only. Orders the Claims desk; never decides anything.
+    # See services/verification_score.py for how each part is worked out.
+    score: Mapped[float | None] = mapped_column(Float)
+    score_m: Mapped[float | None] = mapped_column(Float)
+    score_r: Mapped[float | None] = mapped_column(Float)  # frozen when the claim is sent
+    score_h: Mapped[float | None] = mapped_column(Float)  # frozen when the claim is sent
+    scored_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
     events: Mapped[list["ClaimEvent"]] = relationship(
         back_populates="claim", order_by="ClaimEvent.id", cascade="all, delete-orphan", passive_deletes=True
     )
@@ -102,6 +111,12 @@ class Claim(TimestampMixin, Base):
         # withdrawing or being rejected, if new evidence turns up).
         Index("uq_claims_one_open_per_person", "item_id", "claimant_id", unique=True,
               postgresql_where=text(f"status IN ({_open_list()})")),
+        CheckConstraint("score IS NULL OR (score >= 0 AND score <= 100)", name="score_range"),
+        CheckConstraint(
+            "(score_m IS NULL OR score_m BETWEEN 0 AND 1) AND (score_r IS NULL OR score_r BETWEEN 0 AND 1) "
+            "AND (score_h IS NULL OR score_h BETWEEN 0 AND 1)",
+            name="score_factors_range",
+        ),
     )
 
     @property

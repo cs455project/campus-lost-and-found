@@ -18,11 +18,11 @@ The partial unique indexes on claims are a second line of defence.
 import math
 from datetime import datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
-from app.core.clock import local, now
+from app.core.clock import local, now, today
 from app.core.errors import bad_request, conflict, forbidden, not_found
 from app.models import (
     OPEN_CLAIM_STATUSES,
@@ -39,11 +39,13 @@ from app.models import (
     ItemKind,
     ItemStatus,
     User,
+    UserRole,
 )
 from app.models.claim import CHECKABLE_STATUSES, MAX_DETAILS
 from app.models.item import HELD_STATUSES
 from app.services import email as email_service
 from app.services import storage
+from app.services import verification_score
 from app.services.locks import lock_claim, lock_item
 
 S = ClaimStatus
@@ -171,6 +173,8 @@ def submit(db: Session, item: Item, user: User, description: str, details: list[
 
     claim = Claim(item=item, claimant=user, description=description, status=S.SUBMITTED)
     claim.details = [ClaimDetail(text=text, source=DetailSource.CLAIMANT) for text in (details or [])[:MAX_DETAILS]]
+    # Advisory only: R and H are frozen now; M starts at 0 until a guard checks details.
+    verification_score.score_new_claim(claim, item.happened_on, today(), user.verified_returns)
     db.add(claim)
     db.add(ClaimEvent(claim=claim, from_status=None, to_status=S.SUBMITTED, actor=user))
     _sync_item(db, item)
@@ -232,6 +236,7 @@ def check_detail(db: Session, claim: Claim, staff: User, detail_id: int, verdict
     detail.verdict = verdict
     detail.checked_by = staff if verdict else None
     detail.checked_at = now() if verdict else None
+    verification_score.rescore(claim)  # M changes; the claim's status does not
     db.commit()
     db.refresh(claim)
     return claim
@@ -246,6 +251,7 @@ def add_desk_detail(db: Session, claim: Claim, staff: User, text: str, verdict: 
         raise bad_request("This claim already has the maximum number of details.")
     db.add(ClaimDetail(claim=claim, source=DetailSource.DESK, text=text, verdict=verdict,
                        checked_by=staff, checked_at=now()))
+    verification_score.rescore(claim)
     db.commit()
     db.refresh(claim)
     return claim
@@ -342,6 +348,12 @@ def hand_over(db: Session, claim: Claim, staff: User, note: str | None) -> Claim
 
     item.status = ItemStatus.RETURNED
     item.returned_at = claim.collected_at  # the server's clock, not the browser's
+    # A verified, successful return: counts for the finder's H in future
+    # verification scores. Walk-ins are "reported" by the guard: not counted.
+    # Done in SQL (+1 in the database) so two returns at once can't lose a count.
+    db.execute(update(User)
+               .where(User.id == item.reporter_id, User.role == UserRole.STUDENT)
+               .values(verified_returns=User.verified_returns + 1))
     item.current_office = None
     db.add(CustodyEvent(item=item, event_type=CustodyEventType.RETURNED, from_office=office, actor=staff,
                         note=f"Returned to {claim.claimant.full_name} ({claim.claimant.roll_number or 'staff'}), "
@@ -436,6 +448,22 @@ def detail_for(db: Session, claim: Claim, user: User) -> dict:
         "can_reject": staff_can(S.REJECTED),
         "can_hand_over": staff_can(S.COLLECTED),
         "can_check_details": can_check_details(claim, user),
+        "score": _score_out(claim) if staff else None,
+    }
+
+
+def _score_out(claim: Claim) -> dict | None:
+    """The verification score, for staff. None for claims sent before the
+    score existed (run `python -m app.cli rescore-claims`)."""
+    if claim.score is None:
+        return None
+    return {
+        "score": claim.score, "m": claim.score_m, "r": claim.score_r, "h": claim.score_h,
+        "matched": sum(1 for d in claim.details if d.verdict == DetailVerdict.MATCH),
+        "checked": sum(1 for d in claim.details if d.verdict is not None),
+        "total": len(claim.details),
+        "weights": verification_score.WEIGHTS,
+        "scored_at": claim.scored_at,
     }
 
 
@@ -448,7 +476,7 @@ STAFF_STAGES = {
 }
 
 
-def _rows(db: Session, filters: list, order, page: int, page_size: int) -> dict:
+def _rows(db: Session, filters: list, order, page: int, page_size: int, staff_view: bool = False) -> dict:
     total = db.scalar(select(func.count()).select_from(Claim).where(*filters))
     claims = db.scalars(
         select(Claim).where(*filters).order_by(*order).offset((page - 1) * page_size).limit(page_size)
@@ -464,6 +492,7 @@ def _rows(db: Session, filters: list, order, page: int, page_size: int) -> dict:
             "created_at": c.created_at, "updated_at": c.updated_at, "collect_by": c.collect_by,
             "on_hold": c.status in (S.SUBMITTED, S.UNDER_REVIEW, S.NEEDS_MORE_INFO)
             and c.item_id in approved_items,
+            "score": c.score if staff_view else None,  # never shown to claimants
         }
         for c in claims
     ]
@@ -475,9 +504,12 @@ def list_mine(db: Session, user: User, page: int, page_size: int) -> dict:
     return _rows(db, [Claim.claimant_id == user.id], [Claim.created_at.desc(), Claim.id.desc()], page, page_size)
 
 
-def list_for_staff(db: Session, stage: str, page: int, page_size: int) -> dict:
+def list_for_staff(db: Session, stage: str, page: int, page_size: int, sort: str = "oldest") -> dict:
     # Oldest first for work queues (first come, first served); newest first for closed.
     order = [Claim.updated_at.desc(), Claim.id.desc()] if stage == "closed" else [Claim.created_at, Claim.id]
     if stage == "collect":
         order = [Claim.collect_by, Claim.id]  # soonest deadline first
-    return _rows(db, [Claim.status.in_(STAFF_STAGES[stage])], order, page, page_size)
+    if sort == "score":
+        # FR-SCORE-04: the score only prioritises review. Unscored claims last.
+        order = [Claim.score.desc().nulls_last(), Claim.created_at, Claim.id]
+    return _rows(db, [Claim.status.in_(STAFF_STAGES[stage])], order, page, page_size, staff_view=True)

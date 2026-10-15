@@ -1,0 +1,19 @@
+# Exact versions, so every team member installs the same thing.
+# All of these have ready-made builds for Python 3.14 on Windows.
+
+fastapi==0.143.0           # the web framework: routes, validation, docs page
+uvicorn==0.54.0            # the server that runs the FastAPI app
+sqlalchemy==2.1.4          # talks to the database using Python classes
+alembic==1.20.0            # database migrations (versioned table changes)
+psycopg[binary]==3.3.6     # the PostgreSQL driver SQLAlchemy uses underneath
+pydantic-settings==2.15.0  # reads settings from the .env file
+email-validator==2.3.0     # checks email addresses are well-formed
+python-multipart==0.0.32   # lets FastAPI receive file uploads (item photos)
+tzdata==2026.5             # time-zone data, so "today" is India's date even on Windows
+
+# ---- AI (see backend/docs/AI.md) ----
+fastembed==0.9.0           # local embeddings with a small ONNX model (no PyTorch)
+numpy==2.5.3               # fast vector maths for similarity scores
+openai==3.20.0             # client for OpenAI-compatible APIs (Groq, Gemini)
+pillow==12.3.0             # shrinks photos before they're sent to the AI
+rapidocr_onnxruntime==1.2.3 # reads text on found ID cards, offline (bundled ONNX models, ~14 MB)

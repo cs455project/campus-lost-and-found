@@ -1,0 +1,182 @@
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--surface);
+}
+
+/* ---------- Left: the blue pitch panel ---------- */
+
+.pitch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 40px 44px;
+  color: #ffffff;
+  background: linear-gradient(150deg, #16237a 0%, var(--brand-dark) 45%, var(--brand) 100%);
+  overflow: hidden;
+}
+
+/* The pegboard dots. */
+.pitch::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1.2px, transparent 1.3px);
+  background-size: 17px 17px;
+  pointer-events: none;
+}
+
+.pitch > * {
+  position: relative;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.brand > span:last-child {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.mark {
+  /* The TraceBack logo (components/Logo.js). */
+  display: block;
+  flex-shrink: 0;
+  border-radius: 11px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.brandSub {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.pitchCopy {
+  max-width: 30rem;
+}
+
+.pitchTitle {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  color: #ffffff;
+  margin-bottom: 14px;
+}
+
+.pitchTitle em {
+  font-style: normal;
+  color: #ffd98a;
+}
+
+.pitchCopy p {
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+}
+
+/* Sample item pins, slightly tilted like notes on a board. */
+.pins {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.pin {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 190px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: var(--ink);
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.45);
+  font-size: 0.78rem;
+}
+
+.pin:nth-child(1) {
+  transform: rotate(-1deg);
+}
+
+.pin:nth-child(2) {
+  transform: rotate(1deg) translateY(10px);
+}
+
+.pin:nth-child(3) {
+  transform: rotate(-0.5deg);
+}
+
+.pin strong {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+}
+
+.pin span:last-child {
+  color: var(--ink-soft);
+}
+
+.pinStamp {
+  align-self: flex-start;
+  margin-bottom: 4px;
+  padding: 1px 6px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  transform: rotate(-4deg);
+}
+
+.pin[data-kind="LOST"] .pinStamp {
+  color: var(--lost);
+}
+
+.pin[data-kind="FOUND"] .pinStamp,
+.pin[data-kind="RETURNED"] .pinStamp {
+  color: var(--found);
+}
+
+/* ---------- Right: the form ---------- */
+
+.formSide {
+  display: grid;
+  place-items: center;
+  padding: 40px 24px;
+}
+
+.formBox {
+  width: 100%;
+  max-width: 372px;
+}
+
+@media (max-width: 860px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+
+  .pitch {
+    display: none;
+  }
+
+  .formSide {
+    place-items: start center;
+    padding-top: 56px;
+  }
+}

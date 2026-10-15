@@ -1,0 +1,30 @@
+/* Home: two stacked sections, "Recently reported lost" and "found". */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+}
+
+/* Section title on the left, "See all" link on the right. */
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sectionHead h2 {
+  margin: 0;
+}
+
+.seeAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+}

@@ -1,0 +1,135 @@
+/* The item "tag": white card, photo on top, lifts slightly on hover. */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.card:has(.link:hover) {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-3);
+  border-color: #cfd6e6;
+}
+
+.finished {
+  opacity: 0.7;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+  flex: 1;
+  border-radius: 0;
+}
+
+.link:hover {
+  color: inherit;
+}
+
+.photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--rule-soft);
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  place-items: center;
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.noPhoto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1rem;
+  text-align: center;
+}
+
+/* The rubber stamp: tilted, outlined, in the corner. */
+.stamp {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 2px 7px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+
+.stamp[data-kind="FOUND"],
+.stamp[data-kind="RETURNED"] {
+  color: var(--found);
+}
+
+.stamp[data-kind="LOST"] {
+  color: var(--lost);
+}
+
+.body {
+  padding: 12px 13px 13px;
+}
+
+.ref {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  margin-bottom: 2px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.97rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+
+.status {
+  margin-bottom: 6px;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.meta svg {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+}
+
+.action {
+  padding: 0 13px 13px;
+}

@@ -1,0 +1,82 @@
+/* The sign-in form, inside the split screen (components/AuthLayout). */
+
+.card {
+  width: 100%;
+}
+
+.heading {
+  font-size: 1.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* "Student | Admin / Guard" switch. */
+.modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 0.75rem 0 1rem;
+  padding: 4px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+  background: var(--paper);
+}
+
+.mode {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+/* The radio circle itself is hidden; the whole label acts as the button. */
+.mode input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mode:has(input:checked) {
+  background: var(--surface);
+  color: var(--brand-dark);
+  box-shadow: var(--shadow-1), 0 0 0 1px var(--rule);
+}
+
+.mode:has(input:focus-visible) {
+  box-shadow: var(--focus);
+}
+
+.lede {
+  color: var(--ink-soft);
+  margin-bottom: 1.5rem;
+}
+
+/* The code box: big, centred, spaced-out mono digits. */
+.code {
+  font-family: var(--font-mono) !important;
+  font-size: 1.85rem !important;
+  letter-spacing: 0.45em;
+  text-align: center;
+  padding: 12px 0 12px 0.45em !important;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.devHint {
+  margin-top: 1.5rem;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--amber-wash);
+  color: var(--amber);
+  font-size: 0.8rem;
+}

@@ -1,0 +1,280 @@
+.back {
+  font-size: var(--text-sm);
+  margin-bottom: 0.5rem;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+/* Status badge: colour helps, but the words always carry the meaning. */
+.badge {
+  display: inline-block;
+  padding: 0.125rem 0.625rem;
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  background: #e3e8ef;
+  color: var(--ink);
+}
+
+.badge[data-status="APPROVED"],
+.badge[data-status="COLLECTED"] {
+  background: #d8efe3;
+  color: var(--ok);
+}
+
+.badge[data-status="NEEDS_MORE_INFO"] {
+  background: #fff1c7;
+  color: #6b4e00;
+}
+
+.badge[data-status="REJECTED"],
+.badge[data-status="EXPIRED"] {
+  background: #f6dcdd;
+  color: var(--string);
+}
+
+.itemBrief {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+
+.itemBrief img,
+.noPhoto {
+  width: 4.5rem;
+  height: 3.5rem;
+  object-fit: cover;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+
+.noPhoto {
+  display: grid;
+  place-items: center;
+  background: #dfe4ea;
+  font-size: 0.6875rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* The "what to do now" box for the claimant. */
+.nextStep {
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.nextStep h2 {
+  font-size: var(--text-lg);
+  margin: 0 0 0.5rem;
+}
+
+.nextStep p:last-child {
+  margin-bottom: 0;
+}
+
+.nextStep[data-status="NEEDS_MORE_INFO"],
+.nextStep[data-status="APPROVED"] {
+  background: #fff7e0;
+  border-color: var(--manila-edge);
+}
+
+.message {
+  font-style: italic;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.panel h2 {
+  font-size: var(--text-lg);
+  margin-top: 0;
+}
+
+.description {
+  white-space: pre-line;
+}
+
+.subheading {
+  font-size: var(--text-base);
+  margin: 1rem 0 0.5rem;
+}
+
+.proofs {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.proofs img {
+  display: block;
+  width: 8rem;
+  height: 6rem;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+/* History as a timeline: a line down the left with a dot per event. */
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 18px;
+  border-left: 2px solid var(--rule);
+}
+
+.history li {
+  position: relative;
+}
+
+.history li::before {
+  content: "";
+  position: absolute;
+  left: -24px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 3px var(--surface);
+}
+
+.history li + li {
+  margin-top: 0.9rem;
+}
+
+/* ---------- Progress tracker ---------- */
+
+.tracker {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 18px 0 6px;
+  padding: 0;
+}
+
+.trackStep {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-top: 9px;
+  border-top: 3px solid var(--rule);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.trackNum {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.trackStep[data-state="done"],
+.trackStep[data-state="current"] {
+  border-top-color: var(--brand);
+  color: var(--brand-dark);
+}
+
+.trackStep[data-state="dead"] {
+  border-top-color: var(--lost);
+  color: var(--lost);
+}
+
+@media (max-width: 30rem) {
+  .trackStep {
+    font-size: 0.72rem;
+  }
+}
+
+.note {
+  margin: 0.25rem 0 0;
+  white-space: pre-line;
+}
+
+/* Staff section: same blue top edge as the staff panel on item pages. */
+.staff {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--accent);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.staff h2 {
+  font-size: var(--text-lg);
+  margin-top: 0;
+}
+
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 1.5rem;
+}
+
+@media (max-width: 36rem) {
+  .compare {
+    grid-template-columns: 1fr;
+  }
+}
+
+.others {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.warning {
+  color: var(--string);
+  font-weight: 700;
+}
+
+.actions {
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.idCheck {
+  background: #fff7e0;
+  border: 1px solid var(--manila-edge);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.idCheck label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-weight: 700;
+}
+
+.idCheck input {
+  margin-top: 0.3rem;
+}

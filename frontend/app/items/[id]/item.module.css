@@ -1,0 +1,407 @@
+.back {
+  font-size: 0.86rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ---------- Title block ---------- */
+
+.header {
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  margin-bottom: 8px;
+}
+
+.ref {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+
+/* Same rubber stamp as on the item cards. */
+.stamp {
+  padding: 1px 7px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+
+.stamp[data-kind="FOUND"],
+.stamp[data-kind="RETURNED"] {
+  color: var(--found);
+}
+
+.stamp[data-kind="LOST"] {
+  color: var(--lost);
+}
+
+/* ---------- Two columns: the item, and what to do about it ---------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 26px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mainCol,
+.sideCol {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+/* On wide screens the action column stays in view while scrolling. */
+@media (min-width: 1081px) {
+  .sideCol {
+    position: sticky;
+    top: 88px;
+  }
+}
+
+/* ---------- Photos ---------- */
+
+.gallery {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+}
+
+.mainPhoto {
+  display: block;
+  width: 100%;
+  max-height: 28rem;
+  object-fit: contain;
+  background: var(--rule-soft);
+  border-radius: var(--radius);
+}
+
+.noPhoto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  aspect-ratio: 16 / 7;
+  border-radius: var(--radius);
+  background: var(--rule-soft);
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* The strip of small photos (and the "+ Add" tile) under the big photo. */
+.thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.thumbWrap {
+  position: relative;
+}
+
+.thumb {
+  display: block;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.thumb[aria-pressed="true"] {
+  border-color: var(--brand);
+}
+
+.thumb img {
+  display: block;
+  width: 7rem;
+  height: 5.25rem;
+  object-fit: cover;
+}
+
+/* Round white × in the top-right corner of a small photo. */
+.removePhoto {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(17, 24, 39, 0.35);
+  cursor: pointer;
+}
+
+.removePhoto:hover {
+  background: var(--lost);
+  color: #ffffff;
+}
+
+/* "+ Add": same size as a small photo, dashed border. */
+.addTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: calc(7rem + 4px);
+  height: calc(5.25rem + 4px);
+  border: 2px dashed var(--rule);
+  border-radius: var(--radius);
+  color: var(--brand);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.addTile:hover {
+  border-color: var(--brand);
+  background: var(--brand-wash);
+}
+
+.addTile:has(input:focus-visible) {
+  box-shadow: var(--focus);
+}
+
+.addTile[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ---------- Panels ---------- */
+
+.detailsPanel,
+.office,
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.detailsPanel {
+  padding-bottom: 6px;
+}
+
+/* Panel heading with an action (e.g. Edit) in the top-right corner. */
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.panelHead .panelTitle {
+  margin-bottom: 0;
+}
+
+.editLink {
+  font: inherit;
+  background: var(--surface);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.editLink:hover {
+  color: var(--brand-dark);
+  border-color: var(--brand);
+  background: var(--brand-wash);
+}
+
+.panelTitle {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 12px;
+}
+
+.office h2,
+.panel h2,
+.nextStep h2 {
+  font-size: 1.05rem;
+}
+
+.office p,
+.panel > p:last-of-type {
+  margin-bottom: 0;
+}
+
+.office {
+  border-top: 4px solid var(--found);
+}
+
+/* The "next step" box: the most important thing for a finder to see. */
+.nextStep {
+  background: var(--amber-wash);
+  border: 1px solid #f1dfbd;
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+
+.nextStep p:last-child {
+  margin-bottom: 0;
+  color: var(--ink-soft);
+}
+
+/* "Change office" and "Cancel this report", side by side. */
+.handInActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.handInForm .field {
+  margin-bottom: 0.8rem;
+}
+
+.handInForm {
+  margin-bottom: 14px;
+}
+
+.cancelConfirm {
+  background: var(--surface);
+  border: 1px solid #f5d2cf;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 0 0 14px;
+}
+
+.cancelConfirm p {
+  margin: 0 0 10px;
+  color: var(--lost) !important;
+  font-weight: 600;
+}
+
+.handInNote {
+  font-size: 0.86rem;
+}
+
+.small {
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 22px;
+  margin: 0 0 16px;
+}
+
+.facts dt {
+  color: var(--ink-faint);
+  font-size: 0.88rem;
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.descTitle {
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+}
+
+/* Keep the line breaks the reporter typed. */
+.description {
+  white-space: pre-line;
+}
+
+.editForm {
+  padding-bottom: 14px;
+}
+
+/* Phase C: the AI's description of the photos. */
+.aiDescription {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--brand-wash);
+  border: 1px solid #d6dcfb;
+}
+
+.aiDescription h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--brand-dark);
+}
+
+.aiDescription h3 span {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.aiDescription p {
+  margin: 0 0 6px;
+}
+
+.aiMarks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 4px 0 8px;
+  padding: 0;
+}
+
+.aiMarks li {
+  background: var(--surface);
+  border: 1px solid #d6dcfb;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.8rem;
+}
+
+.aiNote {
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  margin: 0 !important;
+}

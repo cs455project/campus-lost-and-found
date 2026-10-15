@@ -1,0 +1,119 @@
+.add {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 20px 20px 6px;
+  margin: 1.5rem 0 2rem;
+}
+
+.add h2 {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.hint {
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  margin-bottom: 0;
+}
+
+.addFields {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.4fr) minmax(7rem, 0.6fr) minmax(10rem, 1fr) auto;
+  gap: 0 12px;
+  align-items: end;
+  margin-top: 14px;
+}
+
+.addFields > button {
+  margin-bottom: 1.15rem;
+}
+
+.warning {
+  margin: -0.4rem 0 14px;
+  font-size: 0.82rem;
+  color: var(--amber);
+}
+
+@media (max-width: 860px) {
+  .addFields {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section + .section {
+  margin-top: 1.75rem;
+}
+
+.listHeading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.empty {
+  color: var(--ink-soft);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 8rem minmax(10rem, 13rem) 11rem;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  padding: 12px 18px;
+}
+
+.row + .row {
+  border-top: 1px solid var(--rule);
+}
+
+/* The selects sit in a .field; drop its usual bottom margin inside a row. */
+.row :global(.field) {
+  margin: 0;
+}
+
+.who strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.email {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  overflow-wrap: anywhere;
+}
+
+.selfNote {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.confirm {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 860px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

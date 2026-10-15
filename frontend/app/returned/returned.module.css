@@ -1,0 +1,32 @@
+.filter {
+  max-width: 18rem;
+}
+
+.info {
+  font-size: var(--text-sm);
+}
+
+.returned {
+  margin: 0;
+  color: var(--ok);
+  font-weight: 700;
+}
+
+/* Staff-only details: same blue edge as other staff-only sections. */
+.staff {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.125rem 0.75rem;
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0 0 0.75rem;
+  border-left: 3px solid var(--accent);
+}
+
+.staff dt {
+  color: var(--muted);
+}
+
+.staff dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

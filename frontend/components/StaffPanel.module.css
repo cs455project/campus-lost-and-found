@@ -1,0 +1,65 @@
+/* The staff section has a blue top edge, so staff can tell at a glance
+   which part of the page only they can see. */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.panel h3 {
+  font-size: var(--text-base);
+  margin: 0 0 0.5rem;
+}
+
+.reporter {
+  margin-bottom: 1rem;
+}
+
+.action {
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.small {
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.history {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.history li {
+  margin-bottom: 0.75rem;
+}
+
+.when,
+.note {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.note {
+  color: var(--ink);
+  font-style: italic;
+}
+
+/* Phase D: owners identified from an ID card. */
+.ownerAlerts {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--found-wash);
+}
+
+.ownerAlerts ul {
+  margin: 0.3rem 0 0.4rem;
+  padding-left: 1.1rem;
+  font-size: var(--text-sm);
+}

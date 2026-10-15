@@ -1,0 +1,155 @@
+.form {
+  margin-top: 1.5rem;
+}
+
+/* Each part of the form is a fieldset: a group with its own heading (legend),
+   which screen readers announce before each field in the group. */
+.group {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  margin: 0 0 16px;
+  padding: 20px 20px 6px;
+}
+
+.group legend {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding: 0;
+  margin-bottom: 0.9rem;
+  float: left; /* keeps the legend inside the group's layout */
+  width: 100%;
+}
+
+.group legend + * {
+  clear: both;
+}
+
+/* Under the office dropdown: where the chosen office is and its hours. */
+.officeChosen {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: none;
+  margin: -0.6rem 0 0;
+  padding: 10px 13px;
+  background: var(--brand-wash);
+  border-radius: var(--radius-control);
+  color: var(--brand-dark);
+  font-size: var(--text-sm);
+}
+
+.previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.previews li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.previews img {
+  width: 8rem;
+  height: 6rem;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+.fileLabel {
+  margin-bottom: 0.25rem;
+}
+
+/* ---- "I found this": the lost report in one card ---- */
+
+.lostSummary {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--lost);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.lostPhoto {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius);
+  background: var(--rule-soft);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.lostPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lostRef {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+}
+
+.lostStamp {
+  padding: 1px 6px;
+  border: 1.5px solid var(--lost);
+  border-radius: 3px;
+  color: var(--lost);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+
+.lostTitle {
+  font-size: 1.2rem;
+  margin: 4px 0 10px;
+}
+
+.lostFacts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 5px 16px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.lostFacts dt {
+  color: var(--ink-faint);
+}
+
+.lostFacts dd {
+  margin: 0;
+}
+
+.lostDescription {
+  white-space: pre-line;
+}
+
+@media (max-width: 640px) {
+  .lostSummary {
+    grid-template-columns: 1fr;
+  }
+}

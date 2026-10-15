@@ -1,0 +1,200 @@
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  width: var(--sidebar);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 16px;
+  background: var(--surface);
+  border-right: 1px solid var(--rule);
+}
+
+/* ---- Brand ---- */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 6px;
+  text-decoration: none;
+}
+
+.mark {
+  /* The TraceBack logo (components/Logo.js). */
+  display: block;
+  flex-shrink: 0;
+  border-radius: 11px;
+  box-shadow: var(--shadow-2);
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--brand);
+  letter-spacing: -0.02em;
+}
+
+.brandSub {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+/* ---- Navigation ---- */
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sectionTitle {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 0 12px 4px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--radius-control);
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+}
+
+.link:hover {
+  background: var(--rule-soft);
+  color: var(--ink);
+}
+
+.link[aria-current="page"] {
+  background: var(--brand-wash);
+  color: var(--brand-dark);
+  font-weight: 600;
+}
+
+.report {
+  width: 100%;
+}
+
+/* ---- "Coming next" card ---- */
+
+.next {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+  padding: 13px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  color: var(--brand);
+  font-size: 0.8rem;
+}
+
+.next strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 2px;
+}
+
+.next p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* ---- Phones: a bar along the top, icons only ---- */
+
+@media (max-width: 760px) {
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .brand {
+    padding: 0;
+  }
+
+  .mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brandText,
+  .sectionTitle,
+  .next {
+    display: none;
+  }
+
+  .nav {
+    flex-direction: row;
+    gap: 2px;
+  }
+
+  .section {
+    flex-direction: row;
+  }
+
+  .link {
+    padding: 9px;
+  }
+
+  /* Labels hidden on screen but still read by screen readers. */
+  .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .report {
+    width: auto;
+    padding: 9px;
+    flex-shrink: 0;
+  }
+}

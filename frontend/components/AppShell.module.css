@@ -1,0 +1,19 @@
+/* Sidebar on the left, everything else (top bar + page) on the right. */
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.column {
+  flex: 1;
+  min-width: 0; /* lets wide content shrink instead of pushing the page sideways */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Phones: the sidebar becomes a bar on top, so stack instead. */
+@media (max-width: 760px) {
+  .shell {
+    flex-direction: column;
+  }
+}

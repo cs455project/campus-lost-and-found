@@ -1,0 +1,6 @@
+# Extra tools for development only (not needed on the deployed server).
+# Install with:  pip install -r backend/requirements-dev.txt
+-r requirements.txt
+
+pytest==9.1.1   # runs the automated tests in backend/tests
+httpx2==2.13.1  # lets the tests call the API without starting a server

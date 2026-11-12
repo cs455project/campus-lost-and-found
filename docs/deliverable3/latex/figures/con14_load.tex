@@ -1,0 +1,22 @@
+% CON-14: 1 to 100 students browsing at once, both runs.
+% Data: testing/results/concurrency_results.json (1 API process) and concurrency_results_30_trials.json (2 API processes)
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=2 by 1, horizontal sep=1.7cm},
+  tbstyle, width=0.47\linewidth, height=5.6cm,
+  xmode=log, log basis x=10, xtick={1,10,25,50,100}, xticklabels={1,10,25,50,100},
+  xlabel={Simultaneous users}]
+\nextgroupplot[ylabel={Requests per second}, ymin=0, ymax=300,
+  legend style={at={(0.5,1.04)},anchor=south,legend columns=2}, legend cell align=left]
+\addplot[color=brand, mark=*, mark size=1.6pt] coordinates {(1,140.0)(10,266.9)(25,254.3)(50,232.2)(100,224.4)};
+\addlegendentry{2 API processes (as on the server)}
+\addplot[color=amber, mark=square*, mark size=1.5pt] coordinates {(1,163.8)(10,188.1)(25,182.7)(50,185.7)(100,193.3)};
+\addlegendentry{1 API process}
+\nextgroupplot[ylabel={95th-percentile response (ms)}, ymin=0, ymax=700]
+\addplot[color=brand, mark=*, mark size=1.6pt] coordinates {(1,10)(10,63)(25,141)(50,318)(100,601)};
+\addplot[color=amber, mark=square*, mark size=1.5pt] coordinates {(1,9)(10,78)(25,196)(50,339)(100,615)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{CON-14, 15\,s per level. No request failed at any level in either run; latency grows linearly once the two CPUs are busy, because extra requests wait in line rather than fail.}
+\label{fig:con14}
+\end{figure}

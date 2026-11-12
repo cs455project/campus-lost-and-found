@@ -1,0 +1,191 @@
+% =====================================================================
+%  traceback-d3.sty -- shared style for the TraceBack Deliverable 3 reports
+%  CS455 Software Engineering, IIT Kanpur, 2026-27, Group 4
+%  Same house style as the Deliverable 2 report (TraceBack_D2_Report.tex).
+%  Build any report with:  xelatex NN_name.tex   (run twice for the contents)
+% =====================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{traceback-d3}[2026/11/06 TraceBack D3 report style]
+
+\RequirePackage[margin=2.2cm,headheight=14pt]{geometry}
+\RequirePackage{fontspec}
+\RequirePackage{newunicodechar}
+\RequirePackage{microtype}
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{longtable}
+\RequirePackage{array}
+\RequirePackage{multirow}
+\RequirePackage{enumitem}
+\RequirePackage{fancyhdr}
+\RequirePackage{titlesec}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{caption}
+\RequirePackage{needspace}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.misc,fit,backgrounds,calc,patterns}
+\RequirePackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
+\RequirePackage{pgfgantt}
+\RequirePackage{xurl}
+\RequirePackage{hyperref}
+\urlstyle{tt}
+
+% ---------- Fonts: Latin Modern, plus FreeSerif for the rupee sign ----------
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont{Latin Modern Mono}
+\newfontfamily\rupeefont{FreeSerif}[Scale=MatchUppercase]
+\newunicodechar{₹}{{\rupeefont ₹}}
+\newunicodechar{і}{{\rupeefont і}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{←}{\ensuremath{\leftarrow}}
+\newunicodechar{↔}{\ensuremath{\leftrightarrow}}
+\newunicodechar{×}{\ensuremath{\times}}
+\newunicodechar{≥}{\ensuremath{\geq}}
+\newunicodechar{≤}{\ensuremath{\leq}}
+\newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{✓}{\ensuremath{\checkmark}}
+
+% ---------- Colours (TraceBack brand, as in Deliverable 2) ----------
+\definecolor{brand}{HTML}{2C41C4}
+\definecolor{branddark}{HTML}{1E2E96}
+\definecolor{brandwash}{HTML}{EDF0FE}
+\definecolor{found}{HTML}{12694A}
+\definecolor{foundwash}{HTML}{E9F5F0}
+\definecolor{lost}{HTML}{B4232C}
+\definecolor{lostwash}{HTML}{FBEBEC}
+\definecolor{ink}{HTML}{111827}
+\definecolor{soft}{HTML}{4B5563}
+\definecolor{rule}{HTML}{E5E7EB}
+\definecolor{amber}{HTML}{B45309}
+\definecolor{amberwash}{HTML}{FEF3C7}
+\definecolor{grey}{HTML}{9CA3AF}
+
+\hypersetup{colorlinks=true,linkcolor=branddark,urlcolor=brand,citecolor=brand,
+  pdfauthor={TraceBack team, CS455 Group 4},pdfcreator={XeLaTeX}}
+
+\titleformat{\section}{\needspace{7\baselineskip}\Large\bfseries\color{branddark}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\needspace{5\baselineskip}\large\bfseries\color{ink}}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{soft}}{\thesubsubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{14pt plus 4pt minus 2pt}{6pt plus 2pt}
+\titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{4pt plus 2pt}
+\setlist{itemsep=2pt,topsep=4pt,parsep=1pt}
+\renewcommand{\arraystretch}{1.22}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\LTpre}{6pt}
+\setlength{\LTpost}{6pt}
+\captionsetup{font=small,labelfont={bf,color=branddark},skip=6pt}
+
+\newcommand{\reportshort}{}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{soft}TraceBack \textperiodcentered{} IIT Kanpur Lost \& Found}
+\fancyhead[R]{\small\color{soft}CS455 Deliverable 3 \textperiodcentered{} \reportshort}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\thepage}\renewcommand{\headrulewidth}{0pt}}
+
+% ---------- Helpers ----------
+\newcommand{\jira}[1]{\textsf{\textbf{\color{brand}#1}}}
+\newcommand{\pass}{\textcolor{found}{\textbf{Pass}}}
+\newcommand{\fail}{\textcolor{lost}{\textbf{Fail}}}
+\newcommand{\sev}[1]{\textbf{#1}}
+
+\newtcolorbox{keybox}[1]{colback=brandwash,colframe=brand,fonttitle=\bfseries,
+  title=#1,boxrule=0.6pt,arc=2pt,left=6pt,right=6pt,top=4pt,bottom=4pt,breakable}
+\newtcolorbox{notebox}[1]{colback=amberwash,colframe=amber,fonttitle=\bfseries,
+  title=#1,boxrule=0.6pt,arc=2pt,left=6pt,right=6pt,top=4pt,bottom=4pt,breakable}
+\newtcolorbox{goodbox}[1]{colback=foundwash,colframe=found,fonttitle=\bfseries,
+  title=#1,boxrule=0.6pt,arc=2pt,left=6pt,right=6pt,top=4pt,bottom=4pt,breakable}
+
+% Verbatim-like block for shell commands
+\newtcolorbox{cmdbox}{colback=rule!40,colframe=rule,boxrule=0.4pt,arc=1pt,
+  left=5pt,right=5pt,top=3pt,bottom=3pt,fontupper=\small\ttfamily}
+
+% TikZ styles (shared with Deliverable 2)
+\tikzset{
+  box/.style={draw=brand,fill=brandwash,rounded corners=3pt,align=center,
+    minimum height=0.95cm,text width=#1,font=\small},
+  box/.default=3.2cm,
+  gbox/.style={draw=found,fill=foundwash,rounded corners=3pt,align=center,
+    minimum height=0.95cm,text width=#1,font=\small},
+  gbox/.default=3.2cm,
+  abox/.style={draw=amber,fill=amberwash,rounded corners=3pt,align=center,
+    minimum height=0.95cm,text width=#1,font=\small},
+  abox/.default=3.2cm,
+  rbox/.style={draw=lost,fill=lostwash,rounded corners=3pt,align=center,
+    minimum height=0.95cm,text width=#1,font=\small},
+  rbox/.default=3.2cm,
+  zone/.style={draw=soft,dashed,rounded corners=6pt,inner sep=8pt},
+  arr/.style={-{Stealth[length=2.4mm]},thick,draw=soft},
+  lbl/.style={font=\scriptsize,fill=white,inner sep=1pt,align=center},
+}
+
+% pgfplots defaults: quiet academic look
+\pgfplotsset{
+  tbstyle/.style={
+    width=\linewidth, height=6.2cm,
+    axis lines*=left, tick align=outside, grid=major,
+    grid style={rule}, major grid style={rule},
+    tick label style={font=\footnotesize}, label style={font=\small},
+    legend style={font=\footnotesize,draw=none,fill=none},
+    every axis plot/.append style={line width=1pt},
+  },
+}
+
+% ---------- Title page ----------
+% \maketitlepage{Report number}{Title}{Subtitle}
+\newcommand{\tblogo}{%
+\begin{tikzpicture}[scale=0.045]
+  \shade[left color=brand!80,right color=branddark,rounded corners=8pt] (0,0) rectangle (64,64);
+  \draw[white,opacity=0.75,line width=1.4pt,line cap=round,dash pattern=on 0.1pt off 5pt]
+     (12,12) .. controls (14,24) and (30,18) .. (30,28) .. controls (30,36) and (22,38) .. (30,42);
+  \fill[found!40] (12,12) circle (3.4);
+  \fill[white] (42,20) .. controls (42,20) and (28,32.4) .. (28,42.3)
+     .. controls (28,49.9) and (34.3,56) .. (42,56) .. controls (49.7,56) and (56,49.9) .. (56,42.3)
+     .. controls (56,32.4) and (42,20) .. (42,20) -- cycle;
+  \fill[brand] (42,42.5) circle (5.2);
+\end{tikzpicture}}
+
+\newcommand{\maketitlepage}[3]{%
+\begin{titlepage}
+\centering
+\vspace*{0.8cm}
+\tblogo\\[0.5cm]
+{\Huge\bfseries\color{branddark} TraceBack}\\[0.15cm]
+{\Large\color{soft} IIT Kanpur Lost \& Found Portal}\\[1.1cm]
+{\large\color{soft}Deliverable 3 \textperiodcentered{} Report #1}\\[0.25cm]
+{\LARGE\bfseries #2}\\[0.25cm]
+{\Large #3}\\[0.45cm]
+{\large CS455 -- Software Engineering \textperiodcentered{} 2026-27}\\[1.0cm]
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Member} & \textbf{Roll no.} & \textbf{Primary responsibility} \\
+\midrule
+Rohit Yadav (team lead) & 230873 & Agentic AI and matching \\
+Ankit Agarwal & 230151 & Foundation, OTP sign-in, profiles, listings \\
+Bhanu Pratap & 230287 & Lost and found reports, search \\
+Ankit Kumar Dubey & 230154 & Claims, verification, handover \\
+Dev Sachan & 230353 & SIS Guard custody, item page, app shell \\
+Soumyaranjan Sahu & 241035 & Admin, jobs, email, audit; D3 testing, deployment \\
+\bottomrule
+\end{tabular}\\[0.9cm]
+\begin{tabular}{@{}rl@{}}
+GitHub: & \url{https://github.com/cs455project/campus-lost-and-found}\\
+Jira: & \url{https://iitk-team-m5zcmuav.atlassian.net} (project \textsf{Group 4}, key SCRUM)\\
+Live system: & \url{https://16-176-186-149.sslip.io}\\
+Date: & 6 November 2026\\
+\end{tabular}
+\vfill
+{\small\color{soft} Group 4 \textperiodcentered{} Instructor: Prof.\ Priyanka Bagade}
+\end{titlepage}
+\setcounter{page}{2}}
+
+\endinput

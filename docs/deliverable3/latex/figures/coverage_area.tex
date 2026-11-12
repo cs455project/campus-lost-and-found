@@ -1,0 +1,19 @@
+% Coverage by area. Data: testing/results/coverage_by_area.json
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\begin{axis}[tbstyle, height=7.2cm, width=0.9\linewidth,
+  xbar=1pt, bar width=6.5pt, y=0.85cm, enlarge y limits=0.09,
+  xmin=80, xmax=101.5, xtick={80,85,90,95,100}, xlabel={Coverage (\%)},
+  symbolic y coords={Entry points,AI services,Services (business rules),Routers (API),Models,Schemas (validation),Core},
+  ytick=data, yticklabel style={font=\small, align=right},
+  nodes near coords, nodes near coords style={font=\scriptsize}, every node near coord/.append style={xshift=1pt},
+  legend style={at={(0.5,1.02)},anchor=south,legend columns=2}, grid=major, ymajorgrids=false]
+\addplot[fill=brand!75,draw=brand] coordinates {(95.8,Entry points)(98.0,AI services)(97.2,Services (business rules))(99.7,Routers (API))(98.9,Models)(99.0,Schemas (validation))(100,Core)};
+\addlegendentry{Lines}
+\addplot[fill=found!55,draw=found] coordinates {(87.3,Entry points)(90.8,AI services)(92.8,Services (business rules))(95.5,Routers (API))(100,Models)(85.7,Schemas (validation))(100,Core)};
+\addlegendentry{Branches}
+\end{axis}
+\end{tikzpicture}
+\caption{Line and branch coverage by area (coverage.py 7.17 with branch measurement, 459 pytest tests, 6 November 2026). Overall: 97.9\,\% of lines (3,445 of 3,520) and 91.2\,\% of branches (715 of 784).}
+\label{fig:coverage-area}
+\end{figure}

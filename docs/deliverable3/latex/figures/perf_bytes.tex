@@ -1,0 +1,16 @@
+% Megabytes sent per page view, before (20 users) and after (100 users).
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\begin{axis}[tbstyle, height=5.2cm, width=0.82\linewidth,
+  xbar, bar width=11pt, y=0.95cm, enlarge y limits=0.45,
+  xmin=0, xmax=24, xlabel={Megabytes sent per page view},
+  symbolic y coords={After,Before}, ytick=data, yticklabel style={font=\small},
+  nodes near coords, nodes near coords style={font=\footnotesize},
+  point meta=explicit symbolic, grid=none, axis lines*=left]
+\addplot[fill=lost!70, draw=lost] coordinates {(18.2,Before) [18.2 MB (full 2.9 MB photos)]};
+\addplot[fill=found!70, draw=found] coordinates {(0.84,After) [0.84 MB (640 px WebP thumbnails)]};
+\end{axis}
+\end{tikzpicture}
+\caption{Data per page view. At 18\,MB a page, the t3.small's free 100\,GB of monthly transfer covers about 5,500 page views; at 0.84\,MB it covers more than 100,000.}
+\label{fig:perf-bytes}
+\end{figure}

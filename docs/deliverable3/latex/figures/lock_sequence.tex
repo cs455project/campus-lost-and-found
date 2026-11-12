@@ -1,0 +1,22 @@
+% How row locks serialise two guards approving claims on the same item (CON-06).
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[font=\small, >={Stealth[length=2.2mm]}]
+  \node[box=2.6cm] (g1) at (0,0) {Guard A\\\scriptsize approve claim 1};
+  \node[box=2.6cm] (db) at (5.2,0) {PostgreSQL\\\scriptsize item row, claim rows};
+  \node[box=2.6cm] (g2) at (10.4,0) {Guard B\\\scriptsize approve claim 2};
+  \foreach \n in {g1,db,g2} \draw[soft,densely dashed] (\n.south) -- ++(0,-7.1);
+  \draw[->,thick,brand] (0,-1.2) -- node[lbl,above]{\texttt{SELECT item FOR UPDATE}} (5.2,-1.2);
+  \draw[->,thick,amber] (10.4,-1.55) -- node[lbl,above]{\texttt{SELECT item FOR UPDATE}} (5.2,-1.55);
+  \fill[amberwash,draw=amber] (5.05,-1.7) rectangle (5.35,-4.55);
+  \node[font=\scriptsize,color=amber,anchor=west,align=left] at (5.45,-3.1) {B waits:\\row is locked};
+  \draw[->,thick,brand] (0,-2.2) -- node[lbl,above]{\texttt{SELECT claim FOR UPDATE}; re-read status} (5.2,-2.2);
+  \draw[->,thick,brand] (0,-2.95) -- node[lbl,above]{status SUBMITTED\,→\,APPROVED; event written} (5.2,-2.95);
+  \draw[->,thick,brand] (0,-3.7) -- node[lbl,above]{\texttt{COMMIT} (locks released)} (5.2,-3.7);
+  \draw[<-,thick,brand] (0,-4.25) -- node[lbl,above]{200 OK} (5.2,-4.25);
+  \draw[<-,thick,amber] (10.4,-4.7) -- node[lbl,above]{lock granted; re-read: item already has an approved claim} (5.2,-4.7);
+  \draw[<-,thick,lost] (10.4,-5.6) -- node[lbl,above]{409 Conflict, nothing written} (5.2,-5.6);
+  \node[gbox=9.6cm,anchor=north] at (5.2,-6.2) {Result in 40 of 40 trials: exactly one approved claim, one event, no deadlock};
+\end{tikzpicture}
+\caption{Why the race in CON-06 and CON-07 cannot corrupt a claim. Every claim action locks the item row first and the claim row second, then re-reads both before checking the rules. A partial unique index (\texttt{uq\_claims\_one\_approved\_per\_item}) is the second guard in the database.}
+\label{fig:lock-seq}
+\end{figure}

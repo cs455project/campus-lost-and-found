@@ -1,0 +1,23 @@
+% Requests answered per second in the ramp test (no pauses), per stage of the optimisation.
+% Data: testing/perf/results/{baseline,s1_code,s2_thumbs,final}_ramp.json
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\begin{axis}[tbstyle, height=6.4cm,
+  xmode=log, log basis x=10, xtick={1,5,10,25,50,100}, xticklabels={1,5,10,25,50,100},
+  xlabel={Simultaneous users, no pause between pages}, ylabel={Requests answered per second},
+  ymin=0, ymax=280, legend pos=north west, legend cell align=left,
+  legend style={at={(0.02,0.98)},anchor=north west}]
+\addplot[color=lost, mark=x, mark size=2.5pt] coordinates {(1,73.4)(5,73.8)(10,71.1)(25,4.3)(50,4.3)(100,6.7)};
+\addlegendentry{Before (locks up at 25 users)}
+\addplot[color=amber, mark=triangle*, mark size=2pt] coordinates {(1,68.2)(5,71.8)(10,69.6)(25,66.6)(50,72.5)(100,74.8)};
+\addlegendentry{+ request limit and pool (change 1)}
+\addplot[color=brand!60, mark=square*, mark size=1.6pt] coordinates {(1,135.7)(5,159.6)(10,163.0)(25,148.8)(50,146.1)(100,156.6)};
+\addlegendentry{+ thumbnails (change 2)}
+\addplot[color=found, mark=*, mark size=1.8pt] coordinates {(1,193.8)(5,253.4)(10,234.2)(25,230.6)(50,248.6)(100,254.7)};
+\addlegendentry{Final (all six changes)}
+\node[font=\scriptsize,color=lost,anchor=south] at (axis cs:50,10) {130--200 time-outs per step};
+\end{axis}
+\end{tikzpicture}
+\caption{Ramp test, 30\,s per step after a 5\,s warm-up. Each optimisation stage was measured on its own on a fresh database and a freshly started API.}
+\label{fig:perf-ramp}
+\end{figure}

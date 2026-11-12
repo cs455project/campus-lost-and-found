@@ -1,14 +1,17 @@
-"""The agent's language model: any OpenAI-compatible chat API.
+"""The language model behind the agent and the assistant: any
+OpenAI-compatible chat API.
 
-Two providers, tried in order on every call:
-  1. Groq   (LLM_BASE_URL / LLM_API_KEY / LLM_MODEL)            fast, free tier
-  2. Gemini (LLM_FALLBACK_BASE_URL, key and model from GEMINI_*) fallback
+Up to three providers, tried in this order on every call:
+  1. OpenAI (OPENAI_API_KEY / OPENAI_MODEL)                        first choice
+  2. Gemini (LLM_FALLBACK_BASE_URL, key and model from GEMINI_*)   free tier
+  3. Groq   (LLM_BASE_URL / LLM_API_KEY / LLM_MODEL)               free tier
+A provider without a key is skipped.
 
-If both fail (no key, rate limit, network error, daily limit reached),
+If all fail (no key, rate limit, network error, daily limit reached),
 LLMUnavailable is raised and the caller uses the rule-based matching
 instead, so the app keeps working without any AI provider.
 
-The OpenAI Python SDK is used only as a client: Groq and Gemini both offer
+The OpenAI Python SDK is the client for all three: Groq and Gemini offer
 the same "chat completions" API, including tool (function) calling.
 """
 
@@ -45,13 +48,26 @@ def configured_providers() -> list[Provider]:
     if not settings.ai_enabled:
         return []
     providers = []
+    if settings.openai_api_key and settings.openai_model:
+        providers.append(Provider("openai", settings.openai_base_url, settings.openai_api_key,
+                                  settings.openai_model))
+    gemini_key = settings.llm_fallback_api_key or settings.gemini_api_key
+    gemini_model = settings.llm_fallback_model or settings.gemini_model
+    if gemini_key and gemini_model:
+        providers.append(Provider("gemini", settings.llm_fallback_base_url, gemini_key, gemini_model))
     if settings.llm_api_key and settings.llm_model:
         providers.append(Provider("groq", settings.llm_base_url, settings.llm_api_key, settings.llm_model))
-    fallback_key = settings.llm_fallback_api_key or settings.gemini_api_key
-    fallback_model = settings.llm_fallback_model or settings.gemini_model
-    if fallback_key and fallback_model:
-        providers.append(Provider("gemini", settings.llm_fallback_base_url, fallback_key, fallback_model))
     return providers
+
+
+def sampling(provider: Provider, temperature: float) -> dict:
+    """OpenAI's newer (reasoning) models refuse a temperature setting, and
+    allow tool calling in chat completions only with reasoning_effort
+    "none" (OPENAI_REASONING_EFFORT). The other providers get a temperature."""
+    if provider.name != "openai":
+        return {"temperature": temperature}
+    effort = get_settings().openai_reasoning_effort
+    return {"reasoning_effort": effort} if effort else {}
 
 
 class LLMClient:
@@ -67,11 +83,19 @@ class LLMClient:
     def chat(self, messages: list[dict], tools: list[dict]) -> tuple[dict, str, str]:
         errors = []
         for provider in self.providers:
+            extra = sampling(provider, 0.2)
             try:
-                response = self._clients[provider.name].chat.completions.create(
-                    model=provider.model, messages=messages, tools=tools, tool_choice="auto",
-                    temperature=0.2,
-                )
+                try:
+                    response = self._clients[provider.name].chat.completions.create(
+                        model=provider.model, messages=messages, tools=tools, tool_choice="auto", **extra)
+                except Exception as error:
+                    # An older OpenAI model that doesn't know reasoning_effort:
+                    # ask once more without it.
+                    if "reasoning_effort" not in extra or "reasoning_effort" not in str(error):
+                        raise
+                    extra.pop("reasoning_effort")
+                    response = self._clients[provider.name].chat.completions.create(
+                        model=provider.model, messages=messages, tools=tools, tool_choice="auto", **extra)
                 return _as_dict(response.choices[0].message), provider.name, provider.model
             except Exception as error:  # rate limit, timeout, bad key, server error...
                 log.warning("LLM provider %s failed: %s", provider.name, error)

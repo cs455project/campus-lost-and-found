@@ -1,6 +1,6 @@
 """Phase C: the AI looks at an item's photos and describes the item.
 
-Gemini (free tier) gets up to 3 photos, shrunk to at most 768 px, plus the
+OpenAI (if a key is set), otherwise Gemini, gets up to 3 photos, shrunk to at most 768 px, plus the
 report's own text, and answers in JSON: what the object is, its colour,
 brand, distinctive marks, and a short description. This becomes the
 item's "AI description": shown on the item page and added to the text that
@@ -9,7 +9,7 @@ even if the finder only typed "bag".
 
 Protecting privacy and the free quota:
   - Photos of ID cards and documents (AI_SKIP_PHOTO_CATEGORIES) are NEVER
-    sent: Google may use free-tier data to improve its products.
+    sent: free-tier data may be used by the provider to improve its products.
   - If the model says a photo shows personal information (a face, a name,
     an ID number), its description is thrown away.
   - Each set of photos is described once (items.ai_photos_key): editing the
@@ -59,12 +59,12 @@ personal text into your answer. Do not guess what is not visible."""
 
 
 class VisionClient:
-    """Gemini through its OpenAI-compatible API (images as base64 data URLs)."""
+    """One provider through its OpenAI-compatible API (images as base64 data URLs)."""
 
-    def __init__(self, base_url: str, api_key: str, model: str):
+    def __init__(self, base_url: str, api_key: str, model: str, provider: str = "gemini"):
         from openai import OpenAI
 
-        self.model = model
+        self.model, self.provider = model, provider
         self._client = OpenAI(api_key=api_key, base_url=base_url, timeout=60, max_retries=1)
 
     def describe(self, images: list[bytes], report: dict) -> dict:
@@ -72,9 +72,32 @@ class VisionClient:
         for data in images:
             content.append({"type": "image_url", "image_url": {
                 "url": "data:image/jpeg;base64," + base64.b64encode(data).decode()}})
+        # OpenAI's newer models refuse a temperature setting.
+        extra = {} if self.provider == "openai" else {"temperature": 0.1}
         response = self._client.chat.completions.create(
-            model=self.model, messages=[{"role": "user", "content": content}], temperature=0.1)
+            model=self.model, messages=[{"role": "user", "content": content}], **extra)
         return parse_json(response.choices[0].message.content or "")
+
+
+class VisionChain:
+    """OpenAI first, then Gemini: the first that answers wins. After a call,
+    .provider and .model name the one that answered (for agent_runs)."""
+
+    def __init__(self, clients: list[VisionClient]):
+        self.clients = clients
+        self.provider, self.model = clients[0].provider, clients[0].model
+
+    def describe(self, images: list[bytes], report: dict) -> dict:
+        errors = []
+        for client in self.clients:
+            try:
+                answer = client.describe(images, report)
+                self.provider, self.model = client.provider, client.model
+                return answer
+            except Exception as error:  # rate limit, timeout, bad key, no JSON...
+                log.warning("Photo description by %s failed: %s", client.provider, error)
+                errors.append(f"{client.provider}: {type(error).__name__}: {str(error)[:150]}")
+        raise RuntimeError("; ".join(errors))
 
 
 def parse_json(text: str) -> dict:
@@ -89,17 +112,26 @@ _client: VisionClient | None = None
 _override = False
 
 
-def get_vision() -> VisionClient | None:
-    """Gemini, if a key is set and photo descriptions are switched on."""
+def get_vision() -> VisionClient | VisionChain | None:
+    """OpenAI then Gemini (whichever have a key), if photo descriptions are on.
+    Groq is not used here: its model does not read images."""
     global _client
     if _override:
         return _client
     settings = get_settings()
-    if not (settings.ai_enabled and settings.ai_photo_descriptions and settings.gemini_api_key
-            and settings.gemini_model):
+    if not (settings.ai_enabled and settings.ai_photo_descriptions):
         return None
     if _client is None:
-        _client = VisionClient(settings.llm_fallback_base_url, settings.gemini_api_key, settings.gemini_model)
+        clients = []
+        if settings.openai_api_key and settings.openai_model:
+            clients.append(VisionClient(settings.openai_base_url, settings.openai_api_key,
+                                        settings.openai_model, provider="openai"))
+        if settings.gemini_api_key and settings.gemini_model:
+            clients.append(VisionClient(settings.llm_fallback_base_url, settings.gemini_api_key,
+                                        settings.gemini_model))
+        if not clients:
+            return None
+        _client = clients[0] if len(clients) == 1 else VisionChain(clients)
     return _client
 
 
@@ -117,6 +149,7 @@ def reset_vision() -> None:
 def shrink(path) -> bytes:
     """The photo as a JPEG of at most MAX_SIDE pixels on its longest side."""
     with Image.open(path) as image:
+        image.draft("RGB", (MAX_SIDE, MAX_SIDE))  # JPEG: decode at reduced size, much faster
         image = image.convert("RGB")
         image.thumbnail((MAX_SIDE, MAX_SIDE))
         out = io.BytesIO()
@@ -171,6 +204,6 @@ def describe_photos(db: Session, item: Item, job: AiJob | None) -> None:
         log.warning("Photo description failed for item %s: %s", item.id, exc)
         outcome, error, result = "error", f"{type(exc).__name__}: {exc}"[:500], None
     db.add(AgentRun(job_id=job.id if job else None, item_id=item.id, outcome=outcome,
-                    provider="gemini", model=getattr(client, "model", None), llm_calls=1,
+                    provider=getattr(client, "provider", "gemini"), model=getattr(client, "model", None), llm_calls=1,
                     steps=[{"tool": "describe_photos", "args": {"photos": len(photos)}, "result": result}],
                     error=error, started_at=started, finished_at=now()))

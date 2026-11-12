@@ -332,7 +332,7 @@ export default function ReportForm({ kind }) {
           {/* Where the chosen office is and when it's open. */}
           {chosenOffice && (
             <p className={styles.officeChosen}>
-              <span>{chosenOffice.location_description}</span>
+              {chosenOffice.location_description && <span>{chosenOffice.location_description}</span>}
               <span>Open: {chosenOffice.opening_hours}</span>
             </p>
           )}
@@ -344,8 +344,9 @@ export default function ReportForm({ kind }) {
         <fieldset className={styles.group}>
           <legend>Photos (up to {MAX_PHOTOS})</legend>
           <p className="hint">
-            Photos help the AI describe and match the item. Don&apos;t include faces or documents: photos may be
-            analysed by an AI service (photos of ID cards and documents never are).
+            Photos help the AI describe and match the item. To find matches, the description and photos are
+            processed by AI services (OpenAI, Google Gemini and Groq); your name, email and roll number never are, and photos
+            of ID cards and documents are read only on our own server. Please don&apos;t include faces.
           </p>
           {photos.length > 0 && (
             <ul className={styles.previews}>

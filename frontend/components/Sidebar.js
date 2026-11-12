@@ -18,13 +18,13 @@ import {
   RotateCcw,
   Search,
   ShieldCheck,
-  Sparkles,
   Tag,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import AssistantChat from "@/components/AssistantChat";
 import LogoMark from "@/components/Logo";
 import styles from "./Sidebar.module.css";
 
@@ -113,13 +113,7 @@ export default function Sidebar({ user }) {
         <span className={styles.label}>Report an item</span>
       </Link>
 
-      <div className={styles.next}>
-        <Sparkles size={16} strokeWidth={1.8} aria-hidden="true" />
-        <div>
-          <strong>AI matching is on</strong>
-          <p>Similar lost and found items appear on your reports automatically.</p>
-        </div>
-      </div>
+      <AssistantChat />
     </aside>
   );
 }

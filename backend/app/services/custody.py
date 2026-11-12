@@ -77,6 +77,15 @@ def _open_office(db: Session, office_id: int) -> Office:
     return office
 
 
+def _lock(db: Session, item: Item) -> None:
+    """Lock the item's row until the commit and read it again, so two guards
+    acting on one item at the same moment go one after the other: the second
+    sees what the first did and is refused (concurrency test CON-04).
+    Item first, as in claims._lock."""
+    db.execute(select(Item.id).where(Item.id == item.id).with_for_update())
+    db.refresh(item)
+
+
 def _log(db: Session, item: Item, event_type: CustodyEventType, actor: User,
          from_office: Office | None = None, to_office: Office | None = None,
          note: str | None = None) -> None:
@@ -95,6 +104,7 @@ def _log(db: Session, item: Item, event_type: CustodyEventType, actor: User,
 
 def receive_item(db: Session, item: Item, actor: User, data: ReceiveIn) -> Item:
     """A finder hands in an item they reported online."""
+    _lock(db, item)
     _require(can_receive(item, actor), "Only found items waiting for drop-off can be received.")
     office = _open_office(db, data.office_id)
 
@@ -139,6 +149,7 @@ def register_walk_in(db: Session, actor: User, data: WalkInIn) -> Item:
 
 def transfer(db: Session, item: Item, actor: User, data: TransferIn) -> Item:
     """Move an item between offices, e.g. a sub-office sends it to the main office."""
+    _lock(db, item)
     _require(can_transfer(item, actor), "Only items at an office with no claim in progress can be moved.")
     to_office = _open_office(db, data.to_office_id)
     from_office = item.current_office
@@ -154,6 +165,7 @@ def transfer(db: Session, item: Item, actor: User, data: TransferIn) -> Item:
 
 def dispose(db: Session, item: Item, actor: User, data: DisposeIn) -> Item:
     """Unclaimed item thrown away or donated. Final: it leaves the Found page."""
+    _lock(db, item)
     _require(can_dispose(item, actor), "Only unclaimed items at an office can be disposed of or donated.")
     from_office = item.current_office
     event_type = CustodyEventType(data.outcome)

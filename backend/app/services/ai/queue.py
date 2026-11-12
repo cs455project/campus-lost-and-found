@@ -14,7 +14,7 @@ import logging
 from collections.abc import Callable
 from datetime import timedelta
 
-from sqlalchemy import select, text, update
+from sqlalchemy import func, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -23,7 +23,8 @@ from app.models import AiJob
 
 log = logging.getLogger(__name__)
 
-STALE_AFTER = timedelta(minutes=10)  # a "running" job older than this was interrupted
+STALE_AFTER = timedelta(minutes=10)  # a job "running" longer than this was interrupted
+MAX_ATTEMPTS = 3  # an interrupted job is run again, up to this many tries in all
 
 # kind -> function(db, job) doing the work. Filled in by semantic.py etc.
 HANDLERS: dict[str, Callable[[Session, AiJob], None]] = {}
@@ -39,13 +40,41 @@ def enqueue(db: Session, kind: str, item_id: int) -> None:
     )
 
 
-def _requeue_stale(db: Session) -> None:
-    db.execute(
-        update(AiJob)
-        .where(AiJob.status == "running", AiJob.created_at < now() - STALE_AFTER)
-        .values(status="failed", last_error="Interrupted (runner stopped while working).", finished_at=now())
-    )
+def _requeue_stale(db: Session) -> int:
+    """Jobs left "running" by a runner that was killed (a crash, a restart,
+    a deploy) are queued again, so the report still gets analysed. After
+    MAX_ATTEMPTS tries the job fails for good, and the item says so.
+
+    (Before the failure tests, an interrupted job was simply marked failed:
+    the report never got its matches and its page kept saying "looking for
+    matches". It was also judged by the time it was QUEUED, not started, so
+    a job that had waited long in the queue could be taken for interrupted
+    the moment it began. Failure test FR-06.)"""
+    stale = list(db.scalars(
+        select(AiJob).where(AiJob.status == "running",
+                            func.coalesce(AiJob.started_at, AiJob.created_at) < now() - STALE_AFTER)
+        .with_for_update(skip_locked=True)
+    ))
+    for job in stale:
+        waiting = db.scalar(select(AiJob.id).where(AiJob.kind == job.kind, AiJob.item_id == job.item_id,
+                                                   AiJob.status == "queued"))
+        if waiting is not None:
+            # A newer request for the same item is already queued: it will do the work.
+            job.status, job.finished_at = "failed", now()
+            job.last_error = "Interrupted; a newer job for this item is queued."
+        elif job.attempts < MAX_ATTEMPTS:
+            job.status, job.started_at = "queued", None
+            job.last_error = f"Interrupted (runner stopped while working); queued again after try {job.attempts}."
+            log.warning("AI job %s was interrupted; queued again (try %s of %s)", job.id, job.attempts + 1,
+                        MAX_ATTEMPTS)
+        else:
+            job.status, job.finished_at = "failed", now()
+            job.last_error = f"Interrupted {job.attempts} times; given up."
+            on_failure = FAILURE_HANDLERS.get(job.kind)
+            if on_failure:
+                on_failure(db, job)
     db.commit()
+    return len(stale)
 
 
 def run_next(db: Session) -> bool:
@@ -59,6 +88,7 @@ def run_next(db: Session) -> bool:
         return False
     job.status = "running"
     job.attempts += 1
+    job.started_at = now()
     db.commit()  # other runners now skip it
 
     handler = HANDLERS.get(job.kind)

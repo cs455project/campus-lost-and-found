@@ -13,6 +13,7 @@ import math
 from datetime import datetime, timedelta
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.clock import local, now
@@ -69,6 +70,21 @@ def _allowed(claim: Claim, to: ClaimStatus, user: User | None) -> bool:
     if who == CLAIMANT:
         return user is not None and user.id == claim.claimant_id
     return who == SYSTEM and user is None
+
+
+def _lock(db: Session, claim: Claim) -> None:
+    """Lock the claim's item, then the claim, until the commit, and read both
+    again. Two guards (or a guard and the claimant) acting on the same claim
+    at the same moment then go one after the other, and the second one sees
+    what the first did, so it is refused instead of recorded twice
+    (concurrency tests CON-07, CON-08, CON-09).
+
+    Every claim action locks in the same order, item first, so two requests
+    can never each hold the lock the other is waiting for (a deadlock)."""
+    db.execute(select(Item.id).where(Item.id == claim.item_id).with_for_update())
+    db.execute(select(Claim.id).where(Claim.id == claim.id).with_for_update())
+    db.refresh(claim.item)
+    db.refresh(claim)
 
 
 def _move(db: Session, claim: Claim, to: ClaimStatus, actor: User | None, note: str | None = None) -> None:
@@ -147,6 +163,11 @@ def get_claim(db: Session, claim_id: int, user: User) -> Claim:
 
 
 def submit(db: Session, item: Item, user: User, description: str) -> Claim:
+    # Lock the item and read it again: a claim can't slip in while the item
+    # is being handed over, and a double-click waits for the first claim and
+    # then gets "already have an open claim" (CON-05).
+    db.execute(select(Item.id).where(Item.id == item.id).with_for_update())
+    db.refresh(item)
     if user.is_staff:
         raise forbidden("Security staff can't claim items. Sign in with a student account.")
     if item.reporter_id == user.id:
@@ -160,7 +181,13 @@ def submit(db: Session, item: Item, user: User, description: str) -> Claim:
     db.add(claim)
     db.add(ClaimEvent(claim=claim, from_status=None, to_status=S.SUBMITTED, actor=user))
     _sync_item(db, item)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # The database's "one open claim per person per item" rule caught a
+        # duplicate the check above didn't see: answer 409, not a server error.
+        db.rollback()
+        raise conflict("You already have an open claim on this item.")
     return claim
 
 
@@ -170,6 +197,10 @@ def can_add_proof(claim: Claim, user: User) -> bool:
 
 
 def add_proof(db: Session, claim: Claim, user: User, data: bytes, content_type: str, extension: str) -> None:
+    # Lock the claim and read it again, so parallel uploads can't pass the
+    # 3-proof limit or slip in after review started (as in add_photo).
+    db.execute(select(Claim.id).where(Claim.id == claim.id).with_for_update())
+    db.refresh(claim)
     if not can_add_proof(claim, user):
         if len(claim.proofs) >= MAX_PROOFS:
             raise bad_request(f"A claim can have at most {MAX_PROOFS} proof images.")
@@ -185,6 +216,7 @@ def add_proof(db: Session, claim: Claim, user: User, data: bytes, content_type: 
 
 
 def withdraw(db: Session, claim: Claim, user: User) -> Claim:
+    _lock(db, claim)
     _move(db, claim, S.WITHDRAWN, user, "Withdrawn by the claimant")
     db.commit()
     return claim
@@ -194,6 +226,7 @@ def withdraw(db: Session, claim: Claim, user: User) -> Claim:
 
 
 def start_review(db: Session, claim: Claim, staff: User) -> Claim:
+    _lock(db, claim)
     _move(db, claim, S.UNDER_REVIEW, staff)
     db.commit()
     return claim
@@ -202,6 +235,7 @@ def start_review(db: Session, claim: Claim, staff: User) -> Claim:
 def request_office_visit(db: Session, claim: Claim, staff: User, note: str) -> Claim:
     """The proof isn't conclusive: the claimant must come to the office in
     person. They can't resolve this through the app."""
+    _lock(db, claim)
     _move(db, claim, S.NEEDS_MORE_INFO, staff, note)
     claim.staff_message = note
     db.commit()
@@ -209,23 +243,24 @@ def request_office_visit(db: Session, claim: Claim, staff: User, note: str) -> C
     _email(claim, "Please visit the security office about your claim",
            f"We need more information to check your claim {claim.ref} for \"{claim.item.title}\".\n\n"
            f"{note}\n\n"
-           f"Please visit {office.name} in person ({office.location_description}; open {office.opening_hours}) "
-           "and bring your student ID card.")
+           f"Please visit {office.place()} in person and bring your student ID card.")
     return claim
 
 
 def resume_review(db: Session, claim: Claim, staff: User, note: str) -> Claim:
     """After the office visit: record what the claimant explained, then decide."""
+    _lock(db, claim)
     _move(db, claim, S.UNDER_REVIEW, staff, f"Office visit: {note}")
     db.commit()
     return claim
 
 
 def approve(db: Session, claim: Claim, staff: User, note: str | None) -> Claim:
-    # Lock the item row until we commit. If two guards approve two different
-    # claims at the same moment, the second waits here, then sees the first
-    # approval below and stops. (The partial unique index is a second guard.)
-    db.execute(select(Item.id).where(Item.id == claim.item_id).with_for_update())
+    # Lock the item (and the claim) until we commit. If two guards approve
+    # two different claims at the same moment, the second waits here, then
+    # sees the first approval below and stops. (The partial unique index is
+    # a second guard.)
+    _lock(db, claim)
     if _approved_claim(db, claim.item_id) is not None:
         raise conflict("Another claim on this item is already approved. Wait until it's collected, "
                        "rejected or expired.")
@@ -238,13 +273,14 @@ def approve(db: Session, claim: Claim, staff: User, note: str | None) -> Claim:
     office = claim.item.current_office
     _email(claim, "Your claim is approved: collect your item",
            f"Good news: your claim {claim.ref} for \"{claim.item.title}\" is approved.\n\n"
-           f"Collect it from {office.name} ({office.location_description}; open {office.opening_hours}) "
+           f"Collect it from {office.place()} "
            f"by {local(claim.collect_by).strftime('%d %b %Y, %I:%M %p')}.\n"
            "Bring your student ID card: only you can collect it.")
     return claim
 
 
 def reject(db: Session, claim: Claim, staff: User, reason: str) -> Claim:
+    _lock(db, claim)
     _move(db, claim, S.REJECTED, staff, reason)
     claim.staff_message = reason
     db.commit()
@@ -256,6 +292,7 @@ def reject(db: Session, claim: Claim, staff: User, reason: str) -> Claim:
 def hand_over(db: Session, claim: Claim, staff: User, note: str | None) -> Claim:
     """The approved claimant is at the desk and their ID card matches.
     The item is returned, and every other open claim on it is closed."""
+    _lock(db, claim)  # a second hand-over now sees "collected" and is refused
     item = claim.item
     office = item.current_office  # load before changing anything (autoflush)
     _move(db, claim, S.COLLECTED, staff, note or "ID card checked")
@@ -264,7 +301,7 @@ def hand_over(db: Session, claim: Claim, staff: User, note: str | None) -> Claim
 
     for other in db.scalars(select(Claim).where(
         Claim.item_id == item.id, Claim.id != claim.id, Claim.status.in_(OPEN_CLAIM_STATUSES)
-    )):
+    ).execution_options(populate_existing=True)):
         _move(db, other, S.CLOSED, None, "The item was returned to its owner.")
 
     item.status = ItemStatus.RETURNED
@@ -282,9 +319,14 @@ def expire_overdue(db: Session, at: datetime | None = None) -> int:
     free for other claimants again. The worker runs this every few minutes;
     `at` lets tests pretend it's days later."""
     at = at or now()
-    overdue = list(db.scalars(select(Claim).where(Claim.status == S.APPROVED, Claim.collect_by < at)))
-    for claim in overdue:
-        _move(db, claim, S.EXPIRED, None, f"Not collected within {COLLECT_DAYS} days.")
+    candidates = list(db.scalars(select(Claim).where(Claim.status == S.APPROVED, Claim.collect_by < at)))
+    overdue = []
+    for claim in candidates:
+        _lock(db, claim)
+        # Collected (or changed) while we waited for the lock: leave it.
+        if claim.status == S.APPROVED and claim.collect_by < at:
+            _move(db, claim, S.EXPIRED, None, f"Not collected within {COLLECT_DAYS} days.")
+            overdue.append(claim)
     db.commit()
     for claim in overdue:
         _email(claim, "Your approved claim has expired",
@@ -363,7 +405,14 @@ def _rows(db: Session, filters: list, order, page: int, page_size: int) -> dict:
     total = db.scalar(select(func.count()).select_from(Claim).where(*filters))
     claims = db.scalars(
         select(Claim).where(*filters).order_by(*order).offset((page - 1) * page_size).limit(page_size)
-        .options(selectinload(Claim.item).selectinload(Item.photos), selectinload(Claim.claimant))
+        # Everything the list shows, for the whole page in a few queries
+        # (before: one extra query per claim for its category and office).
+        .options(
+            selectinload(Claim.item).selectinload(Item.photos),
+            selectinload(Claim.item).selectinload(Item.category),
+            selectinload(Claim.item).selectinload(Item.current_office),
+            selectinload(Claim.claimant),
+        )
     ).all()
     approved_items = set(db.scalars(select(Claim.item_id).where(
         Claim.status == S.APPROVED, Claim.item_id.in_([c.item_id for c in claims])

@@ -13,7 +13,7 @@ import logging
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import delete, func, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import get_settings
 from app.core.errors import AppError, bad_request, forbidden, too_many_requests
@@ -88,6 +88,11 @@ def request_login_code(db: Session, raw_email: str) -> None:
     settings = get_settings()
     email = normalize_email(raw_email)
     check_can_sign_in(db, email)
+    # One request per address at a time: parallel requests wait here until
+    # the first has saved its code, then see it and get "please wait"
+    # instead of all sending a code (concurrency test CON-01). The lock ends
+    # with the transaction.
+    db.execute(select(func.pg_advisory_xact_lock(func.hashtext(email))))
     current = now()
 
     # ---- Rate limits: stop someone flooding an inbox with codes ----
@@ -117,14 +122,13 @@ def request_login_code(db: Session, raw_email: str) -> None:
     )
 
     code = generate_login_code()
-    db.add(
-        LoginCode(
-            email=email,
-            code_hash=hash_secret(code),
-            expires_at=current + timedelta(minutes=settings.login_code_minutes),
-            created_at=current,
-        )
+    login_code = LoginCode(
+        email=email,
+        code_hash=hash_secret(code),
+        expires_at=current + timedelta(minutes=settings.login_code_minutes),
+        created_at=current,
     )
+    db.add(login_code)
     # Save before sending: if saving fails, no email goes out with a code
     # that doesn't exist.
     db.commit()
@@ -132,7 +136,12 @@ def request_login_code(db: Session, raw_email: str) -> None:
         email_service.send_login_code(email, code, settings.login_code_minutes)
     except email_service.EmailNotSent as error:
         log.error("Sign-in code for %s not sent: %s", email, error)
-        raise AppError(503, "We couldn't send the email just now. Please try again in a minute.") from error
+        # The code never reached the student, so it must not count against
+        # them: without this, "try again" was answered with "please wait 60
+        # seconds" (failure test FR-08).
+        db.delete(login_code)
+        db.commit()
+        raise AppError(503, "We couldn't send the email just now. Please try again.") from error
 
 
 def verify_login_code(db: Session, raw_email: str, code: str) -> User:
@@ -203,8 +212,12 @@ def start_session(db: Session, user: User) -> str:
 def get_user_for_token(db: Session, token: str) -> User | None:
     """Find the signed-in user for a cookie token, or None if the session
     doesn't exist, has expired, or the user was deactivated."""
+    # joinedload: fetch the session and its user in one query. This runs on
+    # every signed-in request, so the saved round trip adds up.
     session = db.scalar(
-        select(UserSession).where(UserSession.token_hash == hash_secret(token))
+        select(UserSession)
+        .where(UserSession.token_hash == hash_secret(token))
+        .options(joinedload(UserSession.user))
     )
     if session is None or session.expires_at <= now():
         return None

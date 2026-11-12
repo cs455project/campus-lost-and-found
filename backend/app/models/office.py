@@ -32,5 +32,18 @@ class Office(TimestampMixin, Base):
         ),
     )
 
+    @property
+    def directions(self) -> str:
+        """The directions, or "" when none have been entered yet (old seed
+        data said "PLACEHOLDER: ..."; that must never reach a student)."""
+        text = (self.location_description or "").strip()
+        return "" if text.upper().startswith("PLACEHOLDER") else text
+
+    def place(self) -> str:
+        """How emails name the office: "Main Security Office (near the main
+        gate; open 24 hours)", leaving out directions that aren't set."""
+        parts = [p for p in (self.directions, f"open {self.opening_hours}" if self.opening_hours else "") if p]
+        return f"{self.name} ({'; '.join(parts)})" if parts else self.name
+
     def __repr__(self) -> str:
         return f"<Office {self.id} {self.name!r}>"

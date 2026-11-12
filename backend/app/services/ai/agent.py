@@ -2,7 +2,7 @@
 
 An LLM with TOOLS. We describe the report and the tools; the LLM decides
 which tools to call and with which arguments, sees the results, and
-continues until it calls finish (at most MAX_TURNS rounds).
+continues until it calls finish (at most AGENT_MAX_TURNS rounds).
 
 Tools (and what our code checks before doing anything):
 
@@ -61,14 +61,8 @@ from app.services.ai.semantic import (
 
 log = logging.getLogger(__name__)
 
-MAX_TURNS = 6
-MAX_SEARCH_RESULTS = 12
-NOTIFY_MIN_SCORE = 0.7  # the agent may email the owner from this score
-RULE_NOTIFY_MIN_SCORE = 0.8  # without the agent: only very clear matches
-
-# "ambiguous" mode: when is the maths unsure enough to ask the agent?
-CLOSE_SCORES = 0.10  # the best two scores are within this of each other
-UNSURE_BELOW = 0.65  # or the best score is below this (but above the minimum)
+# The agent's limits and thresholds are settings (core/config.py, AGENT_*),
+# so they can be tuned on the server without a code change.
 AT_OFFICE = (ItemStatus.IN_CUSTODY, ItemStatus.CLAIM_PENDING)
 
 SYSTEM_PROMPT = """You are the Recovery Agent of TraceBack, the IIT Kanpur Lost & Found portal. You work only
@@ -230,7 +224,7 @@ def tool_search(db: Session, state: RunState, args: dict) -> dict:
         return extra
 
     ranked = sorted(zip(candidates, text_similarities(item, candidates)),
-                    key=lambda pair: pair[1] + boost(pair[0]), reverse=True)[:MAX_SEARCH_RESULTS]
+                    key=lambda pair: pair[1] + boost(pair[0]), reverse=True)[:get_settings().agent_max_candidates]
     results = []
     for c, sim in ranked:
         state.seen[c.id] = c
@@ -292,8 +286,8 @@ def tool_notify(db: Session, state: RunState, args: dict) -> dict:
         return {"sent": False, "why": "ids must be numbers"}
     pair = {lost_id, found_id}
     other_id = (pair - {state.item.id}).pop() if state.item.id in pair and len(pair) == 2 else None
-    if other_id is None or state.saved.get(other_id, 0) < NOTIFY_MIN_SCORE:
-        return {"sent": False, "why": f"only for a saved match with score >= {NOTIFY_MIN_SCORE}"}
+    if other_id is None or state.saved.get(other_id, 0) < get_settings().agent_notify_min_score:
+        return {"sent": False, "why": f"only for a saved match with score >= {get_settings().agent_notify_min_score}"}
     lost = db.get(Item, lost_id)
     found = db.get(Item, found_id)
     if not lost or not found or lost.kind != ItemKind.LOST or found.kind != ItemKind.FOUND:
@@ -320,8 +314,10 @@ def notify_owner(db: Session, lost: Item, found: Item, after_commit: list) -> di
     office = found.current_office
     details = [("Your report", f"{lost.title} ({lost.ref})"), ("Found item", f"{found.title} ({found.ref})")]
     if office:
-        details += [("Held at", office.name), ("Where", office.location_description),
-                    ("Open", office.opening_hours)]
+        details += [("Held at", office.name)]
+        if office.directions:
+            details.append(("Where", office.directions))
+        details.append(("Open", office.opening_hours))
     mail = email_service.Email(
         kind="match", ref=found.ref,
         subject=f"A found item may match your lost report ({lost.ref})",
@@ -364,7 +360,7 @@ def run_agent(db: Session, state: RunState, job: AiJob | None, client) -> None:
         })},
     ]
     used_before = llm_module.calls_today(db)
-    for _turn in range(MAX_TURNS):
+    for _turn in range(settings.agent_max_turns):
         if used_before + state.llm_calls >= settings.ai_daily_call_limit:
             raise llm_module.LLMUnavailable("Daily AI call limit reached")
         message, state.provider, state.model = client.chat(messages, TOOLS)
@@ -404,16 +400,16 @@ def is_ambiguous(scored: list) -> bool:
     nothing at all) doesn't need the agent."""
     if not scored:
         return False
-    if len(scored) >= 2 and scored[0][0] - scored[1][0] < CLOSE_SCORES:
+    if len(scored) >= 2 and scored[0][0] - scored[1][0] < get_settings().agent_close_scores:
         return True
-    return scored[0][0] < UNSURE_BELOW
+    return scored[0][0] < get_settings().agent_unsure_below
 
 
 def _rules_only(db: Session, item: Item, scored: list | None = None) -> list:
     """Rule-based matching, plus an owner email for a very clear match."""
     best = compute_matches(db, item, scored)
     emails: list = []
-    if best and best[0][0] >= RULE_NOTIFY_MIN_SCORE:
+    if best and best[0][0] >= get_settings().rule_notify_min_score:
         candidate = best[0][1]
         lost, found = (item, candidate) if item.kind == ItemKind.LOST else (candidate, item)
         notify_owner(db, lost, found, emails)

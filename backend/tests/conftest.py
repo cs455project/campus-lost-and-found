@@ -61,6 +61,20 @@ def db():
     connection.close()
 
 
+@pytest.fixture
+def session_factory(db):
+    """A stand-in for SessionLocal, for code that opens its own sessions
+    (the CLI, the worker, the seed script, the email log). Its sessions join
+    this test's transaction, so whatever they commit is still undone at the
+    end, and the test's `db` session sees it straight away."""
+
+    def _factory() -> Session:
+        return Session(bind=db.connection(), join_transaction_mode="create_savepoint",
+                       expire_on_commit=False)
+
+    return _factory
+
+
 @pytest.fixture(autouse=True)
 def email_log(monkeypatch, tmp_path):
     """Emails tests don't intercept are logged here instead of the real

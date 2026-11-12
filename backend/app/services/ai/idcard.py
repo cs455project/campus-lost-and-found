@@ -335,8 +335,10 @@ def _email(item: Item, alert: OwnerAlert) -> email_service.Email:
              else f"your email address ({alert.id_hint})")
     details = [("Item", f"{item.title} ({item.ref})")]
     if office:
-        details += [("Held at", office.name), ("Where", office.location_description),
-                    ("Open", office.opening_hours)]
+        details += [("Held at", office.name)]
+        if office.directions:
+            details.append(("Where", office.directions))
+        details.append(("Open", office.opening_hours))
     return email_service.Email(
         kind="id_card", ref=item.ref,
         subject=f"Your ID card may have been found ({item.ref})",

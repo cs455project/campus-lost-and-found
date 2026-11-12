@@ -60,8 +60,8 @@ def report_lost(db: Session, user: User, data: LostItemIn) -> Item:
         **data.model_dump(),
     )
     db.add(item)
-    db.commit()
-    matching.notify_saved(db, item)  # let the matcher (if any) index it
+    db.flush()  # the report and its AI job are committed together, below
+    matching.notify_saved(db, item)  # let the matcher (if any) index it; commits
     return item
 
 
@@ -97,8 +97,8 @@ def report_found(db: Session, user: User, data: FoundItemIn) -> Item:
         **fields,
     )
     db.add(item)
-    db.commit()
-    matching.notify_saved(db, item)  # let the matcher (if any) index it
+    db.flush()  # the report and its AI job are committed together, below
+    matching.notify_saved(db, item)  # let the matcher (if any) index it; commits
     return item
 
 
@@ -301,12 +301,18 @@ def remove_photo(db: Session, item: Item, user: User, photo_id: int) -> None:
 
 
 def add_photo(db: Session, item: Item, user: User, data: bytes, content_type: str, extension: str) -> ItemPhoto:
+    # Lock the item and count its photos again: uploads run side by side in
+    # worker threads, and two of them must not both see "2 of 3" and both
+    # add a photo (concurrency test CON-10).
+    db.execute(select(Item.id).where(Item.id == item.id).with_for_update())
+    db.expire(item, ["photos"])
     if not can_add_photos(item, user):
         if len(item.photos) >= get_settings().max_photos_per_item:
             raise bad_request(f"An item can have at most {get_settings().max_photos_per_item} photos.")
         raise forbidden("You can't add photos to this item now.")
 
     stored_name = storage.save(data, extension)
+    storage.make_thumbnail(stored_name)  # the small copy for lists (see storage.py)
     photo = ItemPhoto(
         item_id=item.id,
         stored_name=stored_name,

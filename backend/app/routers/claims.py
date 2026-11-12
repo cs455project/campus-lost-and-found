@@ -51,10 +51,11 @@ def claim_detail(claim_id: int, user: OnboardedUser, db: DbSession):
 
 
 @router.post("/claims/{claim_id}/proofs", response_model=ClaimOut, status_code=status.HTTP_201_CREATED)
-async def add_proof(claim_id: int, user: OnboardedUser, db: DbSession, file: UploadFile = File()):
-    """Add one proof image (max 3), before a guard starts reviewing."""
+def add_proof(claim_id: int, user: OnboardedUser, db: DbSession, file: UploadFile = File()):
+    """Add one proof image (max 3), before a guard starts reviewing.
+    A plain `def`, like upload_photo: it uses the database."""
     claim = claims.get_claim(db, claim_id, user)
-    data, content_type, extension = await storage.read_image(file)
+    data, content_type, extension = storage.read_image(file)
     claims.add_proof(db, claim, user, data, content_type, extension)
     return claims.detail_for(db, claim, user)
 

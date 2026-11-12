@@ -26,3 +26,13 @@ Thumbs.db
 
 # ---- Downloaded AI models (re-downloaded automatically) ----
 backend/.cache/
+
+# ---- Database backups (contain personal data) ----
+backup*.sql
+*.dump
+
+# ---- Test output ----
+.coverage
+htmlcov/
+testing/run/
+.venv

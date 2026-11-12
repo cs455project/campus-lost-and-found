@@ -1,0 +1,30 @@
+# Caddy gets a free HTTPS certificate for SITE_ADDRESS automatically.
+{$SITE_ADDRESS} {
+	encode gzip
+
+	# Security headers on every response (the API adds its own too).
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+		-X-Powered-By
+	}
+
+	# Photos are up to 5 MB each; leave some room.
+	request_body {
+		max_size 25MB
+	}
+
+	# /api/... goes straight to FastAPI, without the /api prefix
+	# (the same thing next.config.mjs does in development).
+	handle_path /api/* {
+		reverse_proxy backend:8000
+	}
+
+	# Everything else is the Next.js website.
+	handle {
+		reverse_proxy frontend:3000
+	}
+}

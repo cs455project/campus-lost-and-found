@@ -1,0 +1,11 @@
+# Keep secrets, local data and caches out of the image.
+.env
+.env.*
+!.env.example
+uploads/
+.cache/
+.pytest_cache/
+__pycache__/
+**/__pycache__/
+*.pyc
+tests/

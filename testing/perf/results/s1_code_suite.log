@@ -1,0 +1,6 @@
+s1_code/ramp users=    1 rps=   68.2 p50=81.6 p95=108.1 p99=121.2 err=0.0% to=0 pv/s=7.5 MB/s=152.72 cpu api=91.0 pg=10.1 gen=19.5 tot=125.0
+s1_code/ramp users=    5 rps=   71.8 p50=346.9 p95=459.3 p99=491.8 err=0.0% to=0 pv/s=9.0 MB/s=158.45 cpu api=92.4 pg=7.5 gen=21.2 tot=133.5
+s1_code/ramp users=   10 rps=   69.6 p50=611.5 p95=819.1 p99=882.4 err=0.0% to=0 pv/s=7.8 MB/s=155.2 cpu api=94.5 pg=10.5 gen=22.3 tot=130.6
+s1_code/ramp users=   25 rps=   66.6 p50=1160.0 p95=1554.5 p99=1687.1 err=0.0% to=0 pv/s=8.7 MB/s=145.56 cpu api=94.6 pg=11.2 gen=22.6 tot=131.8
+s1_code/ramp users=   50 rps=   72.5 p50=1955.6 p95=2492.4 p99=2764.9 err=0.0% to=0 pv/s=9.6 MB/s=158.26 cpu api=93.3 pg=10.8 gen=22.7 tot=130.0
+s1_code/ramp users=  100 rps=   74.8 p50=3564.2 p95=4736.6 p99=4849.2 err=0.0% to=0 pv/s=9.6 MB/s=164.95 cpu api=94.5 pg=10.7 gen=22.6 tot=131.8

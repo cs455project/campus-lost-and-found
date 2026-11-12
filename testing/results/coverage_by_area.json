@@ -1,0 +1,51 @@
+[
+ {
+  "area": "Core",
+  "statements": 205,
+  "branch_points": 16,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0
+ },
+ {
+  "area": "Schemas (validation)",
+  "statements": 194,
+  "branch_points": 14,
+  "lines_pct": 99.0,
+  "branches_pct": 85.7
+ },
+ {
+  "area": "Models",
+  "statements": 380,
+  "branch_points": 4,
+  "lines_pct": 98.9,
+  "branches_pct": 100.0
+ },
+ {
+  "area": "Routers (API)",
+  "statements": 289,
+  "branch_points": 22,
+  "lines_pct": 99.7,
+  "branches_pct": 95.5
+ },
+ {
+  "area": "Services (business rules)",
+  "statements": 1174,
+  "branch_points": 320,
+  "lines_pct": 97.2,
+  "branches_pct": 92.8
+ },
+ {
+  "area": "AI services",
+  "statements": 848,
+  "branch_points": 250,
+  "lines_pct": 98.0,
+  "branches_pct": 90.8
+ },
+ {
+  "area": "Entry points",
+  "statements": 430,
+  "branch_points": 158,
+  "lines_pct": 95.8,
+  "branches_pct": 87.3
+ }
+]

@@ -1,0 +1,196 @@
+{
+ "results": [
+  {
+   "id": "CON-01",
+   "title": "10 simultaneous code requests for one address",
+   "expected": "Exactly 1 code sent; the other 9 refused (60 s wait)",
+   "trials": 10,
+   "observed": "codes sent per trial: Counter({1: 4, 4: 1, 2: 1, 6: 1, 10: 1, 8: 1, 5: 1}); accepted per trial: Counter({1: 4, 4: 1, 2: 1, 6: 1, 10: 1, 8: 1, 5: 1})",
+   "result": "FAIL",
+   "severity": "Medium",
+   "note": "Each extra code is another email to the same inbox."
+  },
+  {
+   "id": "CON-02",
+   "title": "20 simultaneous wrong guesses on one sign-in code",
+   "expected": "At most 5 guesses counted; the code is then locked",
+   "trials": 10,
+   "observed": "attempts recorded: Counter({5: 10}); right code accepted afterwards: 0 of 10",
+   "result": "PASS",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CON-03",
+   "title": "The correct code submitted 5 times at once",
+   "expected": "Exactly 1 sign-in; the code is single-use",
+   "trials": 10,
+   "observed": "sign-ins per trial: Counter({1: 10})",
+   "result": "PASS",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CON-04",
+   "title": "Two guards receive the same item at the same moment",
+   "expected": "One succeeds; one RECEIVED entry in the history",
+   "trials": 10,
+   "observed": "successful receives per trial: Counter({2: 9, 1: 1}); RECEIVED entries per item: Counter({2: 9, 1: 1})",
+   "result": "FAIL",
+   "severity": "Medium",
+   "note": "A second entry would record two guards and two offices for one hand-in."
+  },
+  {
+   "id": "CON-05",
+   "title": "One student sends the same claim 5 times at once",
+   "expected": "1 claim created; the rest refused with 409, no server errors",
+   "trials": 10,
+   "observed": "claims created per item: Counter({1: 10}); responses: {500: 28, 201: 10, 409: 12}",
+   "result": "FAIL",
+   "severity": "Low",
+   "note": "The database index guarantees one open claim; the question is how the duplicates are answered."
+  },
+  {
+   "id": "CON-06",
+   "title": "Two guards approve two different claims on one item at once",
+   "expected": "Only 1 claim approved",
+   "trials": 10,
+   "observed": "approved claims per item: Counter({1: 10})",
+   "result": "PASS",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CON-07",
+   "title": "One guard approves while another rejects the same claim",
+   "expected": "Exactly one decision recorded",
+   "trials": 10,
+   "observed": "decisions recorded per claim: Counter({1: 10})",
+   "result": "PASS",
+   "severity": "",
+   "note": "Two decisions mean the history shows both, the claimant may get both emails, and the final status is whichever wrote last."
+  },
+  {
+   "id": "CON-08",
+   "title": "Two guards hand over the same item at once",
+   "expected": "One hand-over: 1 COLLECTED and 1 RETURNED entry",
+   "trials": 10,
+   "observed": "COLLECTED entries: Counter({2: 10}); RETURNED entries: Counter({2: 10})",
+   "result": "FAIL",
+   "severity": "High",
+   "note": ""
+  },
+  {
+   "id": "CON-09",
+   "title": "Claimant withdraws at the moment a guard hands the item over",
+   "expected": "Either returned (claim collected) or still held (claim withdrawn), never a mix",
+   "trials": 10,
+   "observed": "outcomes: {'claim COLLECTED / item RETURNED': 10}; inconsistent: 7",
+   "result": "FAIL",
+   "severity": "High",
+   "note": ""
+  },
+  {
+   "id": "CON-10",
+   "title": "6 photos uploaded at once to an item limited to 3",
+   "expected": "At most 3 photos stored",
+   "trials": 10,
+   "observed": "photos stored per item: Counter({3: 10})",
+   "result": "PASS",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CON-11",
+   "title": "Two guards move the same item to different offices at once",
+   "expected": "The item's office matches its newest history entry",
+   "trials": 10,
+   "observed": "items whose office disagrees with the history: 0 of 10",
+   "result": "PASS",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CON-12",
+   "title": "5 copies of the worker send drop-off reminders at the same moment",
+   "expected": "10 reminders, one per item",
+   "trials": 10,
+   "observed": "reminder emails logged: 10; items marked reminded: 10",
+   "result": "PASS",
+   "severity": "",
+   "note": "Uses FOR UPDATE SKIP LOCKED, so each worker takes different rows."
+  },
+  {
+   "id": "CON-13",
+   "title": "30 reports at once, AI queue served by 3 runners (API + 2 workers)",
+   "expected": "Every job done exactly once; no duplicate suggestions",
+   "trials": 1,
+   "observed": "30 reports: Counter({201: 30}); jobs: {'done': 30}; jobs run more than once: 0; duplicate suggestions: 0",
+   "result": "PASS",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CON-14",
+   "title": "1 to 100 students browsing at once for 15 s each",
+   "expected": "No errors; 95% of requests under 1 s at 50 users",
+   "trials": 5,
+   "observed": "1 users: 117.2/s, p95 13 ms, errors 0; 10 users: 227.1/s, p95 77 ms, errors 0; 25 users: 233.3/s, p95 170 ms, errors 0; 50 users: 208.5/s, p95 349 ms, errors 0; 100 users: 202.2/s, p95 728 ms, errors 0",
+   "result": "PASS",
+   "severity": "",
+   "note": ""
+  }
+ ],
+ "load": [
+  {
+   "users": 1,
+   "requests": 1758,
+   "per_second": 117.2,
+   "p50_ms": 8,
+   "p95_ms": 13,
+   "p99_ms": 19,
+   "errors": 0,
+   "error_kinds": {}
+  },
+  {
+   "users": 10,
+   "requests": 3411,
+   "per_second": 227.1,
+   "p50_ms": 42,
+   "p95_ms": 77,
+   "p99_ms": 93,
+   "errors": 0,
+   "error_kinds": {}
+  },
+  {
+   "users": 25,
+   "requests": 3518,
+   "per_second": 233.3,
+   "p50_ms": 104,
+   "p95_ms": 170,
+   "p99_ms": 205,
+   "errors": 0,
+   "error_kinds": {}
+  },
+  {
+   "users": 50,
+   "requests": 3169,
+   "per_second": 208.5,
+   "p50_ms": 229,
+   "p95_ms": 349,
+   "p99_ms": 404,
+   "errors": 0,
+   "error_kinds": {}
+  },
+  {
+   "users": 100,
+   "requests": 3124,
+   "per_second": 202.2,
+   "p50_ms": 424,
+   "p95_ms": 728,
+   "p99_ms": 847,
+   "errors": 0,
+   "error_kinds": {}
+  }
+ ]
+}

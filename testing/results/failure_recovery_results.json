@@ -1,0 +1,124 @@
+{
+ "run_at": "2026-11-06 15:40:37 Asia",
+ "results": [
+  {
+   "id": "FR-01",
+   "title": "Database stops while the site is in use",
+   "failure_injected": "PostgreSQL stopped (0.1 s), then started again",
+   "expected": "Requests fail within seconds with a clear message (503), nothing half-saved; the API reconnects by itself when the database is back",
+   "observed": "while down: API /health 503 in 0.01 s, website /api/health 503 in 0.02 s, Found page 503 in 0.0 s ('{\"detail\":\"TraceBack is briefly unavailable. Please try again in a moment.\"}'), new report 503; internals leaked: False. After the restart: healthy 0.0 s after PostgreSQL was started, without restarting the API; the student's session still works (200); half-saved reports: 0",
+   "measures": {
+    "error_response_s": 0.01,
+    "recovery_s": 0.0
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-02",
+   "title": "Database restarts while 10 students are browsing",
+   "failure_injected": "PostgreSQL stopped for 3 s under load",
+   "expected": "Requests during the restart fail fast; every request after it succeeds; no restart of the API needed",
+   "observed": "11228 requests from 10 users over 30 s; database down from 8.3 s to 11.4 s; 2411 requests failed, the last one started at 11.35 s; after the restart: 4406 requests, 0 failed; slowest request 0.21 s; failures by kind {'503': 2407, 'RemoteProtocolError': 4}",
+   "measures": {
+    "requests": 11228,
+    "failed": 2411,
+    "slowest_request_s": 0.21,
+    "errors_end_after_db_up_s": -0.1
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-03",
+   "title": "API process crashes",
+   "failure_injected": "Both API processes killed with kill -9, then started again (in production Docker restarts them: restart: unless-stopped)",
+   "expected": "The website answers at once with an error instead of hanging; after the restart, sessions, reports and photos are all still there",
+   "observed": "API processes killed (kill -9). While down: website /api/health 500 in 0.03 s, Found page 200 in 0.03 s. API healthy 0.8 s after starting again. Afterwards: session 200, item 200, photo 200 (2529 bytes)",
+   "measures": {
+    "error_response_s": 0.03,
+    "api_start_s": 0.8
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-04",
+   "title": "API crashes in the middle of saving reports",
+   "failure_injected": "API killed while 8 students were sending reports",
+   "expected": "Every confirmed report is saved; a report cut off is either saved completely (with its AI job) or not at all",
+   "observed": "333 reports confirmed (201) before the crash, 8 requests cut off; saved: 336; confirmed but missing: 0; saved without their AI job: 0; without their reporter: 0",
+   "measures": {
+    "confirmed": 333,
+    "cut_off": 8,
+    "lost": 0
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-05",
+   "title": "Background worker is down",
+   "failure_injected": "Worker stopped while 10 reports came in, then started",
+   "expected": "Students can still report; the AI work waits in the queue and is done once, as soon as the worker is back",
+   "observed": "worker stopped; 10 reports still accepted and shown (owner's page 200); 10 AI jobs waiting after 4 s; worker started: queue empty after 7.3 s; 5 of 5 lost reports got their match; 10 jobs in all (each report analysed once)",
+   "measures": {
+    "queued_while_down": 10,
+    "catch_up_s": 7.3
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-06",
+   "title": "Worker is killed while it is working on an AI job",
+   "failure_injected": "Job left 'running' by a killed worker; worker restarted",
+   "expected": "The interrupted job is run again automatically (up to 3 tries), so the report still gets its matches",
+   "observed": "job states afterwards: [['done', '2', '']]; report analysed for matching: True; finished 0.9 s after the worker restarted",
+   "measures": {
+    "recovered_s": 0.9
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-07",
+   "title": "AI providers (Groq and Gemini) are unreachable",
+   "failure_injected": "Both LLM addresses point at a closed port",
+   "expected": "Matching falls back to the rule-based ranking; the report still gets its suggestions; the failure is logged in the agent's audit log",
+   "observed": "both AI providers unreachable; job done after 3.1 s; agent run outcome: fallback (LLMUnavailable: groq: APIConnectionError: Connection error.; gemini: APIConnectionError: C); rule-based match saved: True; owner's 'similar items' panel: 200, 5 suggestion(s)",
+   "measures": {
+    "job_s": 3.1
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-08",
+   "title": "Mail server is down when a student signs in",
+   "failure_injected": "No SMTP server; then the server is restored; then it drops out for 1.5 s during a send",
+   "expected": "The student gets a clear 'try again' message and can try again at once; the failure is logged; a short outage is bridged by the automatic retry",
+   "observed": "no mail server: 503 in 3.05 s (\"We couldn't send the email just now. Please try again.\"), logged as [['failed', 'ConnectionRefusedError: [Errno 111] Connection refused']]; server back, student retries at once: 202, code delivered and accepted: 200; server down for 1.5 s during a send: 202 after 3.08 s, log ['sent']",
+   "measures": {
+    "error_response_s": 3.05,
+    "retry_delivery_s": 3.08
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-09",
+   "title": "Mail server is down when a guard approves a claim",
+   "failure_injected": "No SMTP server during the approval",
+   "expected": "The approval is saved (the email is not part of the decision); the failed email is logged",
+   "observed": "approve: 200 in 3.04 s; claim as the student sees it: APPROVED; approval email logged as failed (shown to staff in 'python -m app.cli email-log')",
+   "measures": {
+    "approve_s": 3.04
+   },
+   "result": "PASS"
+  },
+  {
+   "id": "FR-10",
+   "title": "Power cut: every part stops at once",
+   "failure_injected": "API, worker, website and PostgreSQL killed together",
+   "expected": "Everything starts again with no data lost and no manual repair; signed-in users stay signed in",
+   "observed": "everything killed at once (PostgreSQL in immediate mode, like a power cut). Back up in 1.7 s (database 0.0 s, API 0.8 s, website 0.7 s). Rows (users, items, claims, photos) before (7, 351, 1, 1), after (7, 351, 1, 1); session 200; photo 200; schema at 7f3a2c9d41b8; worker running: True",
+   "measures": {
+    "full_recovery_s": 1.7
+   },
+   "result": "PASS"
+  }
+ ]
+}

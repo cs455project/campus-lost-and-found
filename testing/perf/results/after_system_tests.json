@@ -1,0 +1,123 @@
+{
+ "results": [
+  {
+   "id": "SYS-01",
+   "title": "Health check through the website proxy, and sign-in required for private pages",
+   "result": "PASS",
+   "seconds": 0.5,
+   "note": "health ok; /my-reports redirected to /login"
+  },
+  {
+   "id": "SYS-02",
+   "title": "Student signs in with an emailed code and completes onboarding",
+   "result": "PASS",
+   "seconds": 0.7,
+   "note": "code read from email log; profile saved; home page shown"
+  },
+  {
+   "id": "SYS-03",
+   "title": "Student reports a lost item through the form",
+   "result": "PASS",
+   "seconds": 0.7,
+   "note": "lost report created (item 1)"
+  },
+  {
+   "id": "SYS-04",
+   "title": "Second student reports the found item with a photo; it stays hidden until handed in",
+   "result": "PASS",
+   "seconds": 2.2,
+   "note": "found item 2 with photo; not on Found page before hand-in"
+  },
+  {
+   "id": "SYS-05",
+   "title": "Admin signs in as staff and receives the item at the security office",
+   "result": "PASS",
+   "seconds": 1.4,
+   "note": "staff desk listed the item; received at Main Security Office"
+  },
+  {
+   "id": "SYS-06",
+   "title": "Owner finds the item on the Found page, by search, and in AI suggestions on their report",
+   "result": "PASS",
+   "seconds": 1.8,
+   "note": "listed, searchable ('casio' yes, 'umbrella' no), suggested on the lost report"
+  },
+  {
+   "id": "SYS-07",
+   "title": "Owner claims the found item",
+   "result": "PASS",
+   "seconds": 0.5,
+   "note": "claim 1 sent"
+  },
+  {
+   "id": "SYS-08",
+   "title": "Staff reviews and approves the claim; the owner is emailed",
+   "result": "PASS",
+   "seconds": 1.4,
+   "note": "review started, approved; approval email printed for the owner"
+  },
+  {
+   "id": "SYS-09",
+   "title": "Hand-over needs the ID check; item then appears on the Returned page",
+   "result": "PASS",
+   "seconds": 0.6,
+   "note": "button disabled until the ID check is ticked; handed over; listed on Returned"
+  },
+  {
+   "id": "SYS-10",
+   "title": "Admin adds a guard, who can then sign in to the staff desk",
+   "result": "PASS",
+   "seconds": 1.0,
+   "note": "guard added from Manage staff and signed in to the staff desk"
+  },
+  {
+   "id": "SYS-14",
+   "title": "No browser errors on the main pages",
+   "result": "PASS",
+   "seconds": 4.1,
+   "note": "0 console errors and 0 uncaught exceptions on 6 pages"
+  },
+  {
+   "id": "SYS-15",
+   "title": "Response times under light load",
+   "result": "PASS",
+   "seconds": 10.3,
+   "note": "{\"page_median_ms\": {\"/\": 671, \"/found\": 662, \"/items/2\": 653}, \"api_p50_ms\": 7, \"api_p95_ms\": 10}"
+  },
+  {
+   "id": "SYS-11",
+   "title": "Student cannot open staff pages; sign-out ends the session",
+   "result": "PASS",
+   "seconds": 0.9,
+   "note": "staff desk not shown to a student; after sign-out private pages go to /login"
+  },
+  {
+   "id": "SYS-12",
+   "title": "Background worker is running its scheduled jobs",
+   "result": "PASS",
+   "seconds": 0.0,
+   "note": "worker started and ran without errors: 2026-11-05 22:33:24,363 WARNING psycopg: unknown PostgreSQL timezone: 'ASIA0'; will use UTC | 2026-11-05 22:33:24,377 INFO worker: Jobs done: nothing was due"
+  },
+  {
+   "id": "SYS-13",
+   "title": "Pages fit a phone screen (390 px) without sideways scrolling",
+   "result": "PASS",
+   "seconds": 5.0,
+   "note": "all 6 pages <= 390 px wide"
+  }
+ ],
+ "context": {
+  "lost_id": 1,
+  "found_id": 2,
+  "claim_id": 1,
+  "perf": {
+   "page_median_ms": {
+    "/": 671,
+    "/found": 662,
+    "/items/2": 653
+   },
+   "api_p50_ms": 7,
+   "api_p95_ms": 10
+  }
+ }
+}

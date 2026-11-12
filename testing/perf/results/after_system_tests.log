@@ -1,0 +1,17 @@
+PASS SYS-01 Health check through the website proxy, and sign-in required for private pages health ok; /my-reports redirected to /login
+PASS SYS-02 Student signs in with an emailed code and completes onboarding code read from email log; profile saved; home page shown
+PASS SYS-03 Student reports a lost item through the form lost report created (item 1)
+PASS SYS-04 Second student reports the found item with a photo; it stays hidden until handed in found item 2 with photo; not on Found page before hand-in
+PASS SYS-05 Admin signs in as staff and receives the item at the security office staff desk listed the item; received at Main Security Office
+PASS SYS-06 Owner finds the item on the Found page, by search, and in AI suggestions on their report listed, searchable ('casio' yes, 'umbrella' no), suggested on the lost report
+PASS SYS-07 Owner claims the found item claim 1 sent
+PASS SYS-08 Staff reviews and approves the claim; the owner is emailed review started, approved; approval email printed for the owner
+PASS SYS-09 Hand-over needs the ID check; item then appears on the Returned page button disabled until the ID check is ticked; handed over; listed on Returned
+PASS SYS-10 Admin adds a guard, who can then sign in to the staff desk guard added from Manage staff and signed in to the staff desk
+PASS SYS-14 No browser errors on the main pages 0 console errors and 0 uncaught exceptions on 6 pages
+PASS SYS-15 Response times under light load {"page_median_ms": {"/": 671, "/found": 662, "/items/2": 653}, "api_p50_ms": 7, "api_p95_ms": 10}
+PASS SYS-11 Student cannot open staff pages; sign-out ends the session staff desk not shown to a student; after sign-out private pages go to /login
+PASS SYS-12 Background worker is running its scheduled jobs worker started and ran without errors: 2026-11-05 22:33:24,363 WARNING psycopg: unknown PostgreSQL timezone: 'ASIA0'; will use UTC | 2026-11-05 22:33:24,377 INFO worker: Jobs done: nothing was due
+PASS SYS-13 Pages fit a phone screen (390 px) without sideways scrolling all 6 pages <= 390 px wide
+
+15 of 15 passed

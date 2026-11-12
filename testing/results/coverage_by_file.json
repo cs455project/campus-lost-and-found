@@ -1,0 +1,401 @@
+[
+ {
+  "file": "cli.py",
+  "statements": 315,
+  "lines_pct": 94.9,
+  "branches_pct": 86.8,
+  "missing_lines": 16
+ },
+ {
+  "file": "core/capacity.py",
+  "statements": 26,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "core/clock.py",
+  "statements": 9,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "core/config.py",
+  "statements": 79,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "core/database.py",
+  "statements": 12,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "core/deps.py",
+  "statements": 33,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "core/errors.py",
+  "statements": 17,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "core/headers.py",
+  "statements": 16,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "core/security.py",
+  "statements": 13,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "main.py",
+  "statements": 36,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "models/__init__.py",
+  "statements": 11,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "models/ai.py",
+  "statements": 67,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "models/auth.py",
+  "statements": 22,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "models/base.py",
+  "statements": 9,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "models/category.py",
+  "statements": 12,
+  "lines_pct": 91.7,
+  "branches_pct": null,
+  "missing_lines": 1
+ },
+ {
+  "file": "models/claim.py",
+  "statements": 68,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "models/custody.py",
+  "statements": 28,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "models/email_log.py",
+  "statements": 15,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "models/item.py",
+  "statements": 93,
+  "lines_pct": 98.9,
+  "branches_pct": 100.0,
+  "missing_lines": 1
+ },
+ {
+  "file": "models/office.py",
+  "statements": 22,
+  "lines_pct": 95.5,
+  "branches_pct": null,
+  "missing_lines": 1
+ },
+ {
+  "file": "models/user.py",
+  "statements": 33,
+  "lines_pct": 97.0,
+  "branches_pct": 100.0,
+  "missing_lines": 1
+ },
+ {
+  "file": "routers/admin.py",
+  "statements": 21,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "routers/auth.py",
+  "statements": 29,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "routers/claims.py",
+  "statements": 79,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "routers/health.py",
+  "statements": 14,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "routers/items.py",
+  "statements": 92,
+  "lines_pct": 98.9,
+  "branches_pct": 92.9,
+  "missing_lines": 1
+ },
+ {
+  "file": "routers/reference.py",
+  "statements": 12,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "routers/staff.py",
+  "statements": 31,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "routers/users.py",
+  "statements": 11,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "schemas/admin.py",
+  "statements": 9,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "schemas/auth.py",
+  "statements": 6,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "schemas/claim.py",
+  "statements": 35,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "schemas/item.py",
+  "statements": 54,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "schemas/reference.py",
+  "statements": 5,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "schemas/staff.py",
+  "statements": 20,
+  "lines_pct": 100.0,
+  "branches_pct": null,
+  "missing_lines": 0
+ },
+ {
+  "file": "schemas/user.py",
+  "statements": 65,
+  "lines_pct": 96.9,
+  "branches_pct": 83.3,
+  "missing_lines": 2
+ },
+ {
+  "file": "seed.py",
+  "statements": 37,
+  "lines_pct": 97.3,
+  "branches_pct": 92.9,
+  "missing_lines": 1
+ },
+ {
+  "file": "services/admin.py",
+  "statements": 52,
+  "lines_pct": 98.1,
+  "branches_pct": 88.9,
+  "missing_lines": 1
+ },
+ {
+  "file": "services/ai/agent.py",
+  "statements": 210,
+  "lines_pct": 92.9,
+  "branches_pct": 83.3,
+  "missing_lines": 15
+ },
+ {
+  "file": "services/ai/embeddings.py",
+  "statements": 58,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "services/ai/idcard.py",
+  "statements": 182,
+  "lines_pct": 99.5,
+  "branches_pct": 91.0,
+  "missing_lines": 1
+ },
+ {
+  "file": "services/ai/llm.py",
+  "statements": 62,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "services/ai/queue.py",
+  "statements": 67,
+  "lines_pct": 98.5,
+  "branches_pct": 81.2,
+  "missing_lines": 1
+ },
+ {
+  "file": "services/ai/runner.py",
+  "statements": 42,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "services/ai/semantic.py",
+  "statements": 133,
+  "lines_pct": 100.0,
+  "branches_pct": 95.2,
+  "missing_lines": 0
+ },
+ {
+  "file": "services/ai/vision.py",
+  "statements": 94,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "services/auth.py",
+  "statements": 104,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "services/claims.py",
+  "statements": 197,
+  "lines_pct": 95.9,
+  "branches_pct": 92.9,
+  "missing_lines": 8
+ },
+ {
+  "file": "services/custody.py",
+  "statements": 102,
+  "lines_pct": 100.0,
+  "branches_pct": 94.4,
+  "missing_lines": 0
+ },
+ {
+  "file": "services/email.py",
+  "statements": 171,
+  "lines_pct": 100.0,
+  "branches_pct": 95.2,
+  "missing_lines": 0
+ },
+ {
+  "file": "services/items.py",
+  "statements": 178,
+  "lines_pct": 97.2,
+  "branches_pct": 95.8,
+  "missing_lines": 5
+ },
+ {
+  "file": "services/jobs.py",
+  "statements": 85,
+  "lines_pct": 98.8,
+  "branches_pct": 96.2,
+  "missing_lines": 1
+ },
+ {
+  "file": "services/matching.py",
+  "statements": 83,
+  "lines_pct": 92.8,
+  "branches_pct": 94.4,
+  "missing_lines": 6
+ },
+ {
+  "file": "services/returned.py",
+  "statements": 31,
+  "lines_pct": 96.8,
+  "branches_pct": 90.0,
+  "missing_lines": 1
+ },
+ {
+  "file": "services/storage.py",
+  "statements": 144,
+  "lines_pct": 92.4,
+  "branches_pct": 81.5,
+  "missing_lines": 11
+ },
+ {
+  "file": "services/users.py",
+  "statements": 27,
+  "lines_pct": 100.0,
+  "branches_pct": 100.0,
+  "missing_lines": 0
+ },
+ {
+  "file": "worker.py",
+  "statements": 42,
+  "lines_pct": 97.6,
+  "branches_pct": 83.3,
+  "missing_lines": 1
+ }
+]

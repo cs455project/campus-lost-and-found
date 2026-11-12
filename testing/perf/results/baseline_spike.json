@@ -1,0 +1,172 @@
+{
+ "name": "baseline",
+ "test": "spike",
+ "steps": [
+  {
+   "users": 50,
+   "think_s": 0,
+   "seconds": 30.0,
+   "requests": 84,
+   "rps": 2.8,
+   "p50": 15199.1,
+   "p90": 15524.7,
+   "p95": 15527.3,
+   "p99": 15531.4,
+   "max": 15536.5,
+   "errors": 65,
+   "error_rate_pct": 77.38,
+   "timeouts": 65,
+   "status_counts": {
+    "-1": 65,
+    "200": 19
+   },
+   "mb_per_s": 0.0,
+   "mb_per_page_view": 0.001,
+   "page_views": 23,
+   "page_views_per_s": 0.8,
+   "page_p50": 15521.7,
+   "page_p95": 15534.6,
+   "cpu": {
+    "api": 1.6,
+    "postgres": 0.2,
+    "website": 0.6,
+    "worker": 0.1,
+    "loadgen": 1.1,
+    "total": 4.6
+   },
+   "rss_mb_max": {
+    "api": 116.8,
+    "postgres": 526.6,
+    "website": 178.3,
+    "worker": 97.7
+   },
+   "by_endpoint": {
+    "GET /auth/me": {
+     "count": 22,
+     "rps": 0.7,
+     "p50": 15342.4,
+     "p95": 15526.3,
+     "p99": 15529.5,
+     "mean": 8592.8,
+     "errors": 12,
+     "client_4xx": 0,
+     "avg_kb": 0.1
+    },
+    "GET /categories": {
+     "count": 10,
+     "rps": 0.3,
+     "p50": 15214.6,
+     "p95": 15309.7,
+     "p99": 15349.9,
+     "mean": 15211.3,
+     "errors": 10,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /claims/mine": {
+     "count": 5,
+     "rps": 0.2,
+     "p50": 15520.8,
+     "p95": 15525.9,
+     "p99": 15526.3,
+     "mean": 12497.7,
+     "errors": 4,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items (search/filter)": {
+     "count": 9,
+     "rps": 0.3,
+     "p50": 15519.6,
+     "p95": 15528.7,
+     "p99": 15529.3,
+     "mean": 10460.6,
+     "errors": 6,
+     "client_4xx": 0,
+     "avg_kb": 2.0
+    },
+    "GET /items/mine": {
+     "count": 1,
+     "rps": 0.0,
+     "p50": 15128.3,
+     "p95": 15128.3,
+     "p99": 15128.3,
+     "mean": 15128.3,
+     "errors": 1,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/returned": {
+     "count": 1,
+     "rps": 0.0,
+     "p50": 354.6,
+     "p95": 354.6,
+     "p99": 354.6,
+     "mean": 354.6,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 6.6
+    },
+    "GET /items/{id}": {
+     "count": 11,
+     "rps": 0.4,
+     "p50": 15516.5,
+     "p95": 15526.2,
+     "p99": 15528.5,
+     "mean": 11378.8,
+     "errors": 8,
+     "client_4xx": 0,
+     "avg_kb": 0.4
+    },
+    "GET /staff/claims": {
+     "count": 2,
+     "rps": 0.1,
+     "p50": 7947.0,
+     "p95": 14777.6,
+     "p99": 15384.7,
+     "mean": 7947.0,
+     "errors": 1,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /staff/items": {
+     "count": 1,
+     "rps": 0.0,
+     "p50": 15169.4,
+     "p95": 15169.4,
+     "p99": 15169.4,
+     "mean": 15169.4,
+     "errors": 1,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET photo": {
+     "count": 21,
+     "rps": 0.7,
+     "p50": 15192.0,
+     "p95": 15199.7,
+     "p99": 15206.2,
+     "mean": 15190.0,
+     "errors": 21,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "POST /items/lost": {
+     "count": 1,
+     "rps": 0.0,
+     "p50": 15517.7,
+     "p95": 15517.7,
+     "p99": 15517.7,
+     "mean": 15517.7,
+     "errors": 1,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    }
+   }
+  }
+ ],
+ "recovery": {
+  "recovered": true,
+  "seconds_after_load_stopped": 27.0
+ }
+}

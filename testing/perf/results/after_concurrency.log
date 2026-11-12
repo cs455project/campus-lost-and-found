@@ -1,0 +1,22 @@
+setting up users...
+FAIL CON-01 10 simultaneous code requests for one address -> codes sent per trial: Counter({1: 4, 4: 1, 2: 1, 6: 1, 10: 1, 8: 1, 5: 1}); accepted per trial: Counter({1: 4, 4: 1, 2: 1, 6: 1, 10: 1, 8: 1, 5: 1})
+PASS CON-02 20 simultaneous wrong guesses on one sign-in code -> attempts recorded: Counter({5: 10}); right code accepted afterwards: 0 of 10
+PASS CON-03 The correct code submitted 5 times at once -> sign-ins per trial: Counter({1: 10})
+FAIL CON-04 Two guards receive the same item at the same moment -> successful receives per trial: Counter({2: 9, 1: 1}); RECEIVED entries per item: Counter({2: 9, 1: 1})
+FAIL CON-05 One student sends the same claim 5 times at once -> claims created per item: Counter({1: 10}); responses: {500: 28, 201: 10, 409: 12}
+PASS CON-06 Two guards approve two different claims on one item at once -> approved claims per item: Counter({1: 10})
+PASS CON-07 One guard approves while another rejects the same claim -> decisions recorded per claim: Counter({1: 10})
+FAIL CON-08 Two guards hand over the same item at once -> COLLECTED entries: Counter({2: 10}); RETURNED entries: Counter({2: 10})
+FAIL CON-09 Claimant withdraws at the moment a guard hands the item over -> outcomes: {'claim COLLECTED / item RETURNED': 10}; inconsistent: 7
+PASS CON-10 6 photos uploaded at once to an item limited to 3 -> photos stored per item: Counter({3: 10})
+PASS CON-11 Two guards move the same item to different offices at once -> items whose office disagrees with the history: 0 of 10
+PASS CON-12 5 copies of the worker send drop-off reminders at the same moment -> reminder emails logged: 10; items marked reminded: 10
+PASS CON-13 30 reports at once, AI queue served by 3 runners (API + 2 workers) -> 30 reports: Counter({201: 30}); jobs: {'done': 30}; jobs run more than once: 0; duplicate suggestions: 0
+load {'users': 1, 'requests': 1758, 'per_second': 117.2, 'p50_ms': 8, 'p95_ms': 13, 'p99_ms': 19, 'errors': 0, 'error_kinds': {}}
+load {'users': 10, 'requests': 3411, 'per_second': 227.1, 'p50_ms': 42, 'p95_ms': 77, 'p99_ms': 93, 'errors': 0, 'error_kinds': {}}
+load {'users': 25, 'requests': 3518, 'per_second': 233.3, 'p50_ms': 104, 'p95_ms': 170, 'p99_ms': 205, 'errors': 0, 'error_kinds': {}}
+load {'users': 50, 'requests': 3169, 'per_second': 208.5, 'p50_ms': 229, 'p95_ms': 349, 'p99_ms': 404, 'errors': 0, 'error_kinds': {}}
+load {'users': 100, 'requests': 3124, 'per_second': 202.2, 'p50_ms': 424, 'p95_ms': 728, 'p99_ms': 847, 'errors': 0, 'error_kinds': {}}
+PASS CON-14 1 to 100 students browsing at once for 15 s each -> 1 users: 117.2/s, p95 13 ms, errors 0; 10 users: 227.1/s, p95 77 ms, errors 0; 25 users: 233.3/s, p95 170 ms, errors 0; 50 users: 208.5/s, p95 349 ms, errors 0; 100 users: 202.2/s, p95 728 ms, errors 0
+
+9 of 14 concurrency checks passed

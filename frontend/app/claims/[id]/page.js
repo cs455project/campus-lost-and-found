@@ -144,7 +144,7 @@ function ItemBrief({ item }) {
     <div className={styles.itemBrief}>
       {item.cover_photo_id ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={photoUrl(item.id, item.cover_photo_id)} alt="" />
+        <img src={photoUrl(item.id, item.cover_photo_id, "thumb")} alt="" />
       ) : (
         <span className={styles.noPhoto}>{item.category.name}</span>
       )}
@@ -165,7 +165,8 @@ function NextStep({ claim }) {
   const office = claim.item.current_office;
   const officeText = office && (
     <>
-      <strong>{office.name}</strong>, {office.location_description}. Open {office.opening_hours}.
+      <strong>{office.name}</strong>
+      {office.location_description && `, ${office.location_description}`}. Open {office.opening_hours}.
     </>
   );
 

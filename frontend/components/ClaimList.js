@@ -17,7 +17,7 @@ export default function ClaimList({ claims, staffView = false }) {
           <div className={styles.thumb}>
             {claim.item.cover_photo_id ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={photoUrl(claim.item.id, claim.item.cover_photo_id)} alt="" loading="lazy" />
+              <img src={photoUrl(claim.item.id, claim.item.cover_photo_id, "thumb")} alt="" loading="lazy" />
             ) : (
               <span>{claim.item.category.name}</span>
             )}

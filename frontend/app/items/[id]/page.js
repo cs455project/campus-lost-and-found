@@ -154,8 +154,12 @@ function ItemDetail() {
               <p>
                 <strong>{item.current_office_full.name}</strong>
                 <br />
-                {item.current_office_full.location_description}
-                <br />
+                {item.current_office_full.location_description && (
+                  <>
+                    {item.current_office_full.location_description}
+                    <br />
+                  </>
+                )}
                 Open {item.current_office_full.opening_hours}
               </p>
             </section>
@@ -262,7 +266,8 @@ function HandInBox({ item, onChanged }) {
         </form>
       ) : (
         <p>
-          Take the item to <strong>{office.name}</strong>. {office.location_description}. Open {office.opening_hours}.
+          Take the item to <strong>{office.name}</strong>.
+          {office.location_description && ` ${office.location_description}.`} Open {office.opening_hours}.
         </p>
       )}
 
@@ -642,7 +647,7 @@ function Gallery({ item, onChanged }) {
                 onClick={() => setShown(index)}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photoUrl(item.id, photoId)} alt="" />
+                <img src={photoUrl(item.id, photoId, "thumb")} alt="" />
               </button>
               {item.can_remove_photos && (
                 <button

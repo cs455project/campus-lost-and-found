@@ -112,7 +112,7 @@ export default function SimilarItems({ item, version }) {
                 <div className={listStyles.thumb}>
                   {other.cover_photo_id ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photoUrl(other.id, other.cover_photo_id)} alt="" loading="lazy" />
+                    <img src={photoUrl(other.id, other.cover_photo_id, "thumb")} alt="" loading="lazy" />
                   ) : (
                     <span>{other.category.name}</span>
                   )}

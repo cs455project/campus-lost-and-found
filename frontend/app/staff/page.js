@@ -193,7 +193,7 @@ function StaffRow({ item, stage }) {
       <div className={styles.thumb}>
         {item.cover_photo_id ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={photoUrl(item.id, item.cover_photo_id)} alt="" loading="lazy" />
+          <img src={photoUrl(item.id, item.cover_photo_id, "thumb")} alt="" loading="lazy" />
         ) : (
           <span>{item.category.name}</span>
         )}

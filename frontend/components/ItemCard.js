@@ -25,7 +25,7 @@ export default function ItemCard({ item, showStatus = false, extraAction = null,
           {item.cover_photo_id ? (
             // A plain <img>: photos come from our own API, which checks permissions.
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={photoUrl(item.id, item.cover_photo_id)} alt="" loading="lazy" />
+            <img src={photoUrl(item.id, item.cover_photo_id, "thumb")} alt="" loading="lazy" />
           ) : (
             <span className={styles.noPhoto}>
               <ImageOff size={22} strokeWidth={1.5} aria-hidden="true" />

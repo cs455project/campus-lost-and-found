@@ -93,9 +93,14 @@ export function apiUpload(path, file, fieldName = "file") {
   return handle(fetch(`/api${path}`, { method: "POST", body: form }));
 }
 
-/** Address of an item photo (served by the backend with permission checks). */
-export function photoUrl(itemId, photoId) {
-  return `/api/items/${itemId}/photos/${photoId}`;
+/**
+ * Address of an item photo (served by the backend with permission checks).
+ * size "thumb": a small copy (about 640 px, 30-60 KB) for cards in lists,
+ * instead of the full phone photo (often 3-5 MB).
+ */
+export function photoUrl(itemId, photoId, size) {
+  const url = `/api/items/${itemId}/photos/${photoId}`;
+  return size === "thumb" ? `${url}?size=thumb` : url;
 }
 
 /** Address of a claim's proof image (only the claimant and staff can open it). */

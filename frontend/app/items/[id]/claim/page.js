@@ -138,7 +138,7 @@ function ClaimForm() {
       <div className={claimStyles.itemBrief}>
         {item.cover_photo_id && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={photoUrl(item.id, item.cover_photo_id)} alt="" />
+          <img src={photoUrl(item.id, item.cover_photo_id, "thumb")} alt="" />
         )}
         <div>
           <strong>{item.title}</strong>

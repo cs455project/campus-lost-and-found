@@ -1,0 +1,12 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{traceback-d3}
+\renewcommand{\reportshort}{Test Reports}
+\hypersetup{pdftitle={TraceBack -- Test Reports (CS455 Deliverable 3)}}
+\begin{document}
+\maketitlepage{1}{Test Reports}{Unit, Integration, System and Adversarial Testing}
+\begin{keybox}{Summary}
+\textbf{TraceBack passed all 474 functional tests (459 unit and integration, 15 system) and stopped all 23 attacks; both library audits are clean.} The testing found 6 defects in the code and libraries, and all 6 are fixed and re-tested. Sign-in, access control and the claim rules held up under every attack.
+\end{keybox}
+\vspace{2pt}{\setlength{\parskip}{1pt}\tableofcontents}\newpage
+\input{body/01_test_reports}
+\end{document}

@@ -1,0 +1,12 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{traceback-d3}
+\renewcommand{\reportshort}{Defects}
+\hypersetup{pdftitle={TraceBack -- Defects Found and Fixed (CS455 Deliverable 3)}}
+\begin{document}
+\maketitlepage{7}{Defects Found and Fixed}{Defect Register and Evidence for Deliverable 3}
+\begin{keybox}{Summary}
+\textbf{Deliverable 3 testing found 25 defects and weaknesses in TraceBack: 1 critical, 6 high, 12 medium and 6 low. All 25 are fixed, each fix is re-checked by the test, attack or audit that exposed it, and every suite passes on the final code.} None of them broke sign-in, access control or the claim rules under normal use; they surfaced under load, under parallel requests, under attack, in failures, and in peer review.
+\end{keybox}
+
+\input{body/07_defects}
+\end{document}

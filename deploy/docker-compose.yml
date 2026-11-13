@@ -1,0 +1,94 @@
+# The whole app on one server:
+#   caddy (HTTPS, ports 80/443) -> frontend (Next.js) and backend (FastAPI)
+#   backend + worker -> db (PostgreSQL)
+# Run from this deploy/ folder:  sudo docker compose up -d --build
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-lostfound}
+      POSTGRES_USER: ${DB_USER:-lostfound}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in deploy/.env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ../backend
+    image: lostfound-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      # The worker container below runs the AI queue; running it inside the
+      # API as well took CPU from requests and loaded the AI model twice.
+      AI_WORKER_IN_API: "false"
+      # No public /docs or /openapi.json in production (they list every endpoint).
+      API_DOCS: "false"
+    volumes:
+      - uploads:/app/uploads   # item photos and claim proofs
+      - aicache:/app/.cache    # downloaded AI model, saved emails
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  worker:
+    image: lostfound-backend
+    restart: unless-stopped
+    command: ["python", "-m", "app.worker"]
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+    volumes:
+      - uploads:/app/uploads   # shared: the worker deletes old proof images
+      - aicache:/app/.cache
+    depends_on:
+      backend:
+        condition: service_healthy   # waits until migrations have run
+
+  frontend:
+    build:
+      context: ../frontend
+      args:
+        BACKEND_URL: http://backend:8000
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?Set SITE_ADDRESS in deploy/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  pgdata:
+  uploads:
+  aicache:
+  caddy_data:
+  caddy_config:

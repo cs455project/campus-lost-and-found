@@ -1,0 +1,6 @@
+s2_thumbs/ramp users=    1 rps=  135.7 p50=29.0 p95=43.3 p99=52.0 err=0.0% to=0 pv/s=16.6 MB/s=15.31 cpu api=86.4 pg=17.6 gen=8.6 tot=116.4
+s2_thumbs/ramp users=    5 rps=  159.6 p50=76.0 p95=144.8 p99=338.1 err=0.0% to=0 pv/s=18.4 MB/s=17.81 cpu api=89.1 pg=7.5 gen=9.7 tot=135.8
+s2_thumbs/ramp users=   10 rps=  163.0 p50=139.2 p95=225.8 p99=733.0 err=0.0% to=0 pv/s=18.7 MB/s=16.85 cpu api=90.5 pg=11.1 gen=9.9 tot=133.6
+s2_thumbs/ramp users=   25 rps=  148.8 p50=408.1 p95=552.4 p99=1202.8 err=0.0% to=0 pv/s=19.7 MB/s=15.5 cpu api=93.3 pg=17.0 gen=10.2 tot=129.7
+s2_thumbs/ramp users=   50 rps=  146.1 p50=809.6 p95=1209.0 p99=1584.4 err=0.0% to=0 pv/s=20.7 MB/s=16.5 cpu api=93.4 pg=17.5 gen=10.6 tot=130.1
+s2_thumbs/ramp users=  100 rps=  156.6 p50=1604.1 p95=2205.0 p99=2365.7 err=0.0% to=0 pv/s=20.3 MB/s=16.7 cpu api=92.8 pg=16.7 gen=10.8 tot=130.3

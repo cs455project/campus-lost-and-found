@@ -1,0 +1,997 @@
+{
+ "name": "baseline",
+ "test": "ramp",
+ "steps": [
+  {
+   "users": 1,
+   "think_s": 0,
+   "seconds": 30.0,
+   "requests": 2203,
+   "rps": 73.4,
+   "p50": 73.2,
+   "p90": 98.7,
+   "p95": 105.8,
+   "p99": 121.8,
+   "max": 146.7,
+   "errors": 0,
+   "error_rate_pct": 0.0,
+   "timeouts": 0,
+   "status_counts": {
+    "200": 2185,
+    "201": 18
+   },
+   "mb_per_s": 161.41,
+   "mb_per_page_view": 18.842,
+   "page_views": 257,
+   "page_views_per_s": 8.6,
+   "page_p50": 148.0,
+   "page_p95": 223.3,
+   "cpu": {
+    "api": 85.0,
+    "postgres": 2.5,
+    "website": 0.5,
+    "worker": 0.4,
+    "loadgen": 19.2,
+    "total": 143.8
+   },
+   "rss_mb_max": {
+    "api": 133.0,
+    "postgres": 341.1,
+    "website": 178.4,
+    "worker": 101.7
+   },
+   "by_endpoint": {
+    "GET /auth/me": {
+     "count": 107,
+     "rps": 3.6,
+     "p50": 5.5,
+     "p95": 10.0,
+     "p99": 14.7,
+     "mean": 6.1,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.2
+    },
+    "GET /categories": {
+     "count": 108,
+     "rps": 3.6,
+     "p50": 5.4,
+     "p95": 8.5,
+     "p99": 9.6,
+     "mean": 5.7,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.7
+    },
+    "GET /claims/mine": {
+     "count": 37,
+     "rps": 1.2,
+     "p50": 20.6,
+     "p95": 28.0,
+     "p99": 31.2,
+     "mean": 20.6,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 3.2
+    },
+    "GET /items (list)": {
+     "count": 108,
+     "rps": 3.6,
+     "p50": 14.7,
+     "p95": 20.1,
+     "p99": 21.8,
+     "mean": 14.8,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 5.8
+    },
+    "GET /items (search/filter)": {
+     "count": 43,
+     "rps": 1.4,
+     "p50": 14.2,
+     "p95": 21.3,
+     "p99": 23.2,
+     "mean": 15.1,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 5.4
+    },
+    "GET /items/mine": {
+     "count": 37,
+     "rps": 1.2,
+     "p50": 10.3,
+     "p95": 13.1,
+     "p99": 14.0,
+     "mean": 10.4,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 5.0
+    },
+    "GET /items/returned": {
+     "count": 3,
+     "rps": 0.1,
+     "p50": 14.4,
+     "p95": 17.8,
+     "p99": 18.1,
+     "mean": 14.9,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 6.5
+    },
+    "GET /items/{id}": {
+     "count": 52,
+     "rps": 1.7,
+     "p50": 12.5,
+     "p95": 17.8,
+     "p99": 20.4,
+     "mean": 12.6,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.3
+    },
+    "GET photo": {
+     "count": 1690,
+     "rps": 56.3,
+     "p50": 79.9,
+     "p95": 109.0,
+     "p99": 123.2,
+     "mean": 78.1,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 2797.4
+    },
+    "POST /items/lost": {
+     "count": 9,
+     "rps": 0.3,
+     "p50": 19.1,
+     "p95": 29.2,
+     "p99": 30.4,
+     "mean": 20.4,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.9
+    },
+    "POST claim": {
+     "count": 6,
+     "rps": 0.2,
+     "p50": 24.2,
+     "p95": 26.4,
+     "p99": 26.6,
+     "mean": 22.9,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.0
+    },
+    "POST photo upload": {
+     "count": 3,
+     "rps": 0.1,
+     "p50": 27.3,
+     "p95": 33.8,
+     "p99": 34.4,
+     "mean": 29.5,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.9
+    }
+   }
+  },
+  {
+   "users": 5,
+   "think_s": 0,
+   "seconds": 30.0,
+   "requests": 2213,
+   "rps": 73.8,
+   "p50": 268.9,
+   "p90": 397.4,
+   "p95": 434.7,
+   "p99": 507.8,
+   "max": 721.3,
+   "errors": 0,
+   "error_rate_pct": 0.0,
+   "timeouts": 0,
+   "status_counts": {
+    "200": 2189,
+    "201": 24
+   },
+   "mb_per_s": 164.56,
+   "mb_per_page_view": 19.284,
+   "page_views": 256,
+   "page_views_per_s": 8.5,
+   "page_p50": 660.9,
+   "page_p95": 1012.4,
+   "cpu": {
+    "api": 92.8,
+    "postgres": 9.4,
+    "website": 0.3,
+    "worker": 0.5,
+    "loadgen": 20.4,
+    "total": 130.3
+   },
+   "rss_mb_max": {
+    "api": 148.7,
+    "postgres": 623.2,
+    "website": 169.9,
+    "worker": 101.6
+   },
+   "by_endpoint": {
+    "GET /auth/me": {
+     "count": 102,
+     "rps": 3.4,
+     "p50": 42.5,
+     "p95": 125.2,
+     "p99": 186.4,
+     "mean": 57.4,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.2
+    },
+    "GET /categories": {
+     "count": 102,
+     "rps": 3.4,
+     "p50": 39.5,
+     "p95": 139.7,
+     "p99": 220.8,
+     "mean": 57.3,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.7
+    },
+    "GET /claims/mine": {
+     "count": 23,
+     "rps": 0.8,
+     "p50": 69.3,
+     "p95": 176.8,
+     "p99": 208.9,
+     "mean": 84.3,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.8
+    },
+    "GET /items (list)": {
+     "count": 102,
+     "rps": 3.4,
+     "p50": 58.9,
+     "p95": 162.8,
+     "p99": 249.4,
+     "mean": 73.9,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 5.8
+    },
+    "GET /items (search/filter)": {
+     "count": 49,
+     "rps": 1.6,
+     "p50": 66.7,
+     "p95": 191.0,
+     "p99": 282.6,
+     "mean": 90.9,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 5.6
+    },
+    "GET /items/mine": {
+     "count": 23,
+     "rps": 0.8,
+     "p50": 49.6,
+     "p95": 182.2,
+     "p99": 223.0,
+     "mean": 72.3,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.7
+    },
+    "GET /items/returned": {
+     "count": 4,
+     "rps": 0.1,
+     "p50": 46.4,
+     "p95": 147.5,
+     "p99": 161.7,
+     "mean": 74.2,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 6.4
+    },
+    "GET /items/{id}": {
+     "count": 61,
+     "rps": 2.0,
+     "p50": 71.1,
+     "p95": 201.7,
+     "p99": 231.1,
+     "mean": 89.8,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.3
+    },
+    "GET photo": {
+     "count": 1723,
+     "rps": 57.4,
+     "p50": 296.3,
+     "p95": 445.2,
+     "p99": 516.2,
+     "mean": 308.8,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 2797.4
+    },
+    "POST /items/lost": {
+     "count": 14,
+     "rps": 0.5,
+     "p50": 88.4,
+     "p95": 136.1,
+     "p99": 157.7,
+     "mean": 91.0,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.9
+    },
+    "POST claim": {
+     "count": 4,
+     "rps": 0.1,
+     "p50": 111.2,
+     "p95": 134.6,
+     "p99": 136.6,
+     "mean": 103.8,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.0
+    },
+    "POST photo upload": {
+     "count": 6,
+     "rps": 0.2,
+     "p50": 166.1,
+     "p95": 314.5,
+     "p99": 332.7,
+     "mean": 196.0,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.9
+    }
+   }
+  },
+  {
+   "users": 10,
+   "think_s": 0,
+   "seconds": 30.0,
+   "requests": 2132,
+   "rps": 71.1,
+   "p50": 466.5,
+   "p90": 657.0,
+   "p95": 728.1,
+   "p99": 905.7,
+   "max": 1625.8,
+   "errors": 0,
+   "error_rate_pct": 0.0,
+   "timeouts": 0,
+   "status_counts": {
+    "200": 2113,
+    "201": 19
+   },
+   "mb_per_s": 161.12,
+   "mb_per_page_view": 21.015,
+   "page_views": 230,
+   "page_views_per_s": 7.7,
+   "page_p50": 1486.6,
+   "page_p95": 2187.6,
+   "cpu": {
+    "api": 93.3,
+    "postgres": 10.2,
+    "website": 0.4,
+    "worker": 0.2,
+    "loadgen": 21.3,
+    "total": 127.7
+   },
+   "rss_mb_max": {
+    "api": 148.7,
+    "postgres": 731.4,
+    "website": 169.3,
+    "worker": 101.7
+   },
+   "by_endpoint": {
+    "GET /auth/me": {
+     "count": 97,
+     "rps": 3.2,
+     "p50": 226.2,
+     "p95": 465.5,
+     "p99": 525.2,
+     "mean": 240.5,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.2
+    },
+    "GET /categories": {
+     "count": 95,
+     "rps": 3.2,
+     "p50": 237.4,
+     "p95": 366.1,
+     "p99": 449.4,
+     "mean": 236.4,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.7
+    },
+    "GET /claims/mine": {
+     "count": 16,
+     "rps": 0.5,
+     "p50": 300.7,
+     "p95": 367.9,
+     "p99": 385.8,
+     "mean": 266.9,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.8
+    },
+    "GET /items (list)": {
+     "count": 97,
+     "rps": 3.2,
+     "p50": 240.1,
+     "p95": 435.4,
+     "p99": 500.7,
+     "mean": 254.3,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 5.8
+    },
+    "GET /items (search/filter)": {
+     "count": 53,
+     "rps": 1.8,
+     "p50": 273.9,
+     "p95": 526.6,
+     "p99": 573.9,
+     "mean": 271.5,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 5.8
+    },
+    "GET /items/mine": {
+     "count": 16,
+     "rps": 0.5,
+     "p50": 216.8,
+     "p95": 370.0,
+     "p99": 395.1,
+     "mean": 237.0,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.5
+    },
+    "GET /items/returned": {
+     "count": 3,
+     "rps": 0.1,
+     "p50": 306.1,
+     "p95": 579.2,
+     "p99": 603.5,
+     "mean": 366.3,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 6.5
+    },
+    "GET /items/{id}": {
+     "count": 49,
+     "rps": 1.6,
+     "p50": 217.5,
+     "p95": 455.0,
+     "p99": 505.3,
+     "mean": 233.5,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.3
+    },
+    "GET photo": {
+     "count": 1687,
+     "rps": 56.2,
+     "p50": 497.1,
+     "p95": 769.1,
+     "p99": 954.6,
+     "mean": 511.7,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 2797.4
+    },
+    "POST /items/lost": {
+     "count": 11,
+     "rps": 0.4,
+     "p50": 277.8,
+     "p95": 404.8,
+     "p99": 426.4,
+     "mean": 271.9,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 0.9
+    },
+    "POST claim": {
+     "count": 2,
+     "rps": 0.1,
+     "p50": 222.4,
+     "p95": 272.6,
+     "p99": 277.1,
+     "mean": 222.4,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.0
+    },
+    "POST photo upload": {
+     "count": 6,
+     "rps": 0.2,
+     "p50": 368.3,
+     "p95": 445.9,
+     "p99": 448.7,
+     "mean": 345.6,
+     "errors": 0,
+     "client_4xx": 0,
+     "avg_kb": 1.0
+    }
+   }
+  },
+  {
+   "users": 25,
+   "think_s": 0,
+   "seconds": 30.0,
+   "requests": 130,
+   "rps": 4.3,
+   "p50": 15989.3,
+   "p90": 16000.1,
+   "p95": 16002.1,
+   "p99": 16004.3,
+   "max": 16005.6,
+   "errors": 130,
+   "error_rate_pct": 100.0,
+   "timeouts": 130,
+   "status_counts": {
+    "-1": 130
+   },
+   "mb_per_s": 0.0,
+   "mb_per_page_view": 0.0,
+   "page_views": 31,
+   "page_views_per_s": 1.0,
+   "page_p50": 16001.5,
+   "page_p95": 31536.6,
+   "cpu": {
+    "api": 1.2,
+    "postgres": 0.1,
+    "website": 0.6,
+    "worker": 0.1,
+    "loadgen": 1.0,
+    "total": 4.1
+   },
+   "rss_mb_max": {
+    "api": 125.2,
+    "postgres": 533.0,
+    "website": 177.6,
+    "worker": 97.7
+   },
+   "by_endpoint": {
+    "GET /auth/me": {
+     "count": 6,
+     "rps": 0.2,
+     "p50": 16000.1,
+     "p95": 16004.9,
+     "p99": 16005.5,
+     "mean": 15922.7,
+     "errors": 6,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /categories": {
+     "count": 4,
+     "rps": 0.1,
+     "p50": 15112.7,
+     "p95": 15866.2,
+     "p99": 15972.5,
+     "mean": 15334.0,
+     "errors": 4,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /claims/mine": {
+     "count": 1,
+     "rps": 0.0,
+     "p50": 16001.8,
+     "p95": 16001.8,
+     "p99": 16001.8,
+     "mean": 16001.8,
+     "errors": 1,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items (list)": {
+     "count": 9,
+     "rps": 0.3,
+     "p50": 15110.5,
+     "p95": 16003.2,
+     "p99": 16003.3,
+     "mean": 15481.7,
+     "errors": 9,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items (search/filter)": {
+     "count": 2,
+     "rps": 0.1,
+     "p50": 15557.9,
+     "p95": 15957.1,
+     "p99": 15992.6,
+     "mean": 15557.9,
+     "errors": 2,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/mine": {
+     "count": 3,
+     "rps": 0.1,
+     "p50": 15115.5,
+     "p95": 15120.5,
+     "p99": 15121.0,
+     "mean": 15093.4,
+     "errors": 3,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/returned": {
+     "count": 2,
+     "rps": 0.1,
+     "p50": 16000.0,
+     "p95": 16003.0,
+     "p99": 16003.2,
+     "mean": 16000.0,
+     "errors": 2,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/{id}": {
+     "count": 4,
+     "rps": 0.1,
+     "p50": 16001.2,
+     "p95": 16004.3,
+     "p99": 16004.6,
+     "mean": 15789.3,
+     "errors": 4,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /staff/items": {
+     "count": 2,
+     "rps": 0.1,
+     "p50": 15617.5,
+     "p95": 15961.8,
+     "p99": 15992.4,
+     "mean": 15617.5,
+     "errors": 2,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET photo": {
+     "count": 97,
+     "rps": 3.2,
+     "p50": 15241.3,
+     "p95": 15997.8,
+     "p99": 15998.8,
+     "mean": 15578.4,
+     "errors": 97,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    }
+   }
+  },
+  {
+   "users": 50,
+   "think_s": 0,
+   "seconds": 30.0,
+   "requests": 130,
+   "rps": 4.3,
+   "p50": 15970.8,
+   "p90": 16001.0,
+   "p95": 16002.0,
+   "p99": 16004.2,
+   "max": 16004.6,
+   "errors": 130,
+   "error_rate_pct": 100.0,
+   "timeouts": 130,
+   "status_counts": {
+    "-1": 130
+   },
+   "mb_per_s": 0.0,
+   "mb_per_page_view": 0.0,
+   "page_views": 55,
+   "page_views_per_s": 1.8,
+   "page_p50": 16000.0,
+   "page_p95": 32115.6,
+   "cpu": {
+    "api": 1.2,
+    "postgres": 0.3,
+    "website": 0.5,
+    "worker": 0.1,
+    "loadgen": 1.0,
+    "total": 3.5
+   },
+   "rss_mb_max": {
+    "api": 122.0,
+    "postgres": 516.4,
+    "website": 177.9,
+    "worker": 101.5
+   },
+   "by_endpoint": {
+    "GET /auth/me": {
+     "count": 15,
+     "rps": 0.5,
+     "p50": 15111.3,
+     "p95": 16004.5,
+     "p99": 16004.5,
+     "mean": 15524.3,
+     "errors": 15,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /categories": {
+     "count": 19,
+     "rps": 0.6,
+     "p50": 15950.4,
+     "p95": 16000.9,
+     "p99": 16001.0,
+     "mean": 15886.5,
+     "errors": 19,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /claims/mine": {
+     "count": 8,
+     "rps": 0.3,
+     "p50": 15111.2,
+     "p95": 16002.0,
+     "p99": 16003.3,
+     "mean": 15442.7,
+     "errors": 8,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items (list)": {
+     "count": 11,
+     "rps": 0.4,
+     "p50": 16000.0,
+     "p95": 16001.8,
+     "p99": 16002.2,
+     "mean": 16000.1,
+     "errors": 11,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items (search/filter)": {
+     "count": 10,
+     "rps": 0.3,
+     "p50": 15108.3,
+     "p95": 15907.0,
+     "p99": 15980.4,
+     "mean": 15266.1,
+     "errors": 10,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/mine": {
+     "count": 5,
+     "rps": 0.2,
+     "p50": 16001.6,
+     "p95": 16003.3,
+     "p99": 16003.3,
+     "mean": 16001.1,
+     "errors": 5,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/returned": {
+     "count": 1,
+     "rps": 0.0,
+     "p50": 15658.9,
+     "p95": 15658.9,
+     "p99": 15658.9,
+     "mean": 15658.9,
+     "errors": 1,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/{id}": {
+     "count": 17,
+     "rps": 0.6,
+     "p50": 15997.2,
+     "p95": 16002.0,
+     "p99": 16003.3,
+     "mean": 15631.4,
+     "errors": 17,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /staff/claims": {
+     "count": 1,
+     "rps": 0.0,
+     "p50": 15741.6,
+     "p95": 15741.6,
+     "p99": 15741.6,
+     "mean": 15741.6,
+     "errors": 1,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /staff/items": {
+     "count": 3,
+     "rps": 0.1,
+     "p50": 15997.7,
+     "p95": 15999.2,
+     "p99": 15999.3,
+     "mean": 15904.8,
+     "errors": 3,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET photo": {
+     "count": 40,
+     "rps": 1.3,
+     "p50": 15789.0,
+     "p95": 15995.7,
+     "p99": 15997.3,
+     "mean": 15865.7,
+     "errors": 40,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    }
+   }
+  },
+  {
+   "users": 100,
+   "think_s": 0,
+   "seconds": 30.0,
+   "requests": 200,
+   "rps": 6.7,
+   "p50": 15824.1,
+   "p90": 16014.7,
+   "p95": 16018.2,
+   "p99": 16022.7,
+   "max": 16023.2,
+   "errors": 200,
+   "error_rate_pct": 100.0,
+   "timeouts": 200,
+   "status_counts": {
+    "-1": 200
+   },
+   "mb_per_s": 0.0,
+   "mb_per_page_view": 0.0,
+   "page_views": 87,
+   "page_views_per_s": 2.9,
+   "page_p50": 15657.5,
+   "page_p95": 31649.1,
+   "cpu": {
+    "api": 1.1,
+    "postgres": 0.1,
+    "website": 0.5,
+    "worker": 0.1,
+    "loadgen": 1.1,
+    "total": 3.1
+   },
+   "rss_mb_max": {
+    "api": 123.1,
+    "postgres": 401.2,
+    "website": 178.3,
+    "worker": 97.7
+   },
+   "by_endpoint": {
+    "GET /auth/me": {
+     "count": 54,
+     "rps": 1.8,
+     "p50": 15651.5,
+     "p95": 16006.5,
+     "p99": 16012.2,
+     "mean": 15767.4,
+     "errors": 54,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /categories": {
+     "count": 35,
+     "rps": 1.2,
+     "p50": 16005.8,
+     "p95": 16018.4,
+     "p99": 16020.7,
+     "mean": 16004.4,
+     "errors": 35,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /claims/mine": {
+     "count": 24,
+     "rps": 0.8,
+     "p50": 15658.9,
+     "p95": 16020.2,
+     "p99": 16022.3,
+     "mean": 15808.8,
+     "errors": 24,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items (search/filter)": {
+     "count": 20,
+     "rps": 0.7,
+     "p50": 15650.3,
+     "p95": 16007.9,
+     "p99": 16012.3,
+     "mean": 15735.0,
+     "errors": 20,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/mine": {
+     "count": 13,
+     "rps": 0.4,
+     "p50": 16003.8,
+     "p95": 16018.7,
+     "p99": 16018.9,
+     "mean": 16004.4,
+     "errors": 13,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/returned": {
+     "count": 5,
+     "rps": 0.2,
+     "p50": 15655.0,
+     "p95": 16017.5,
+     "p99": 16019.5,
+     "mean": 15797.3,
+     "errors": 5,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /items/{id}": {
+     "count": 34,
+     "rps": 1.1,
+     "p50": 15650.6,
+     "p95": 16011.1,
+     "p99": 16022.3,
+     "mean": 15729.5,
+     "errors": 34,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /staff/claims": {
+     "count": 3,
+     "rps": 0.1,
+     "p50": 15662.2,
+     "p95": 15953.4,
+     "p99": 15979.3,
+     "mean": 15764.5,
+     "errors": 3,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "GET /staff/items": {
+     "count": 5,
+     "rps": 0.2,
+     "p50": 15985.3,
+     "p95": 16019.5,
+     "p99": 16022.5,
+     "mean": 15867.7,
+     "errors": 5,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "POST /items/lost": {
+     "count": 6,
+     "rps": 0.2,
+     "p50": 15830.1,
+     "p95": 16010.5,
+     "p99": 16010.5,
+     "mean": 15826.1,
+     "errors": 6,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    },
+    "POST claim": {
+     "count": 1,
+     "rps": 0.0,
+     "p50": 15660.5,
+     "p95": 15660.5,
+     "p99": 15660.5,
+     "mean": 15660.5,
+     "errors": 1,
+     "client_4xx": 0,
+     "avg_kb": 0.0
+    }
+   }
+  }
+ ]
+}

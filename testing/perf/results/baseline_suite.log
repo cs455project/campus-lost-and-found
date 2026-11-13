@@ -1,0 +1,12 @@
+baseline/ramp users=    1 rps=   73.4 p50=73.2 p95=105.8 p99=121.8 err=0.0% to=0 pv/s=8.6 MB/s=161.41 cpu api=85.0 pg=2.5 gen=19.2 tot=143.8
+baseline/ramp users=    5 rps=   73.8 p50=268.9 p95=434.7 p99=507.8 err=0.0% to=0 pv/s=8.5 MB/s=164.56 cpu api=92.8 pg=9.4 gen=20.4 tot=130.3
+baseline/ramp users=   10 rps=   71.1 p50=466.5 p95=728.1 p99=905.7 err=0.0% to=0 pv/s=7.7 MB/s=161.12 cpu api=93.3 pg=10.2 gen=21.3 tot=127.7
+baseline/ramp users=   25 rps=    4.3 p50=15989.3 p95=16002.1 p99=16004.3 err=100.0% to=130 pv/s=1.0 MB/s=0.0 cpu api=1.2 pg=0.1 gen=1.0 tot=4.1
+baseline/ramp users=   50 rps=    4.3 p50=15970.8 p95=16002.0 p99=16004.2 err=100.0% to=130 pv/s=1.8 MB/s=0.0 cpu api=1.2 pg=0.3 gen=1.0 tot=3.5
+baseline/ramp users=  100 rps=    6.7 p50=15824.1 p95=16018.2 p99=16022.7 err=100.0% to=200 pv/s=2.9 MB/s=0.0 cpu api=1.1 pg=0.1 gen=1.1 tot=3.1
+baseline/campus users=   50 rps=    3.5 p50=15665.4 p95=16000.1 p99=16000.8 err=99.36% to=156 pv/s=1.0 MB/s=0.0 cpu api=2.9 pg=0.4 gen=1.6 tot=5.9
+baseline/campus users=  100 rps=    6.4 p50=15662.8 p95=16000.7 p99=16001.4 err=100.0% to=288 pv/s=2.9 MB/s=0.0 cpu api=1.2 pg=0.1 gen=1.4 tot=3.5
+baseline/campus users=  200 rps=   12.2 p50=15817.8 p95=16001.9 p99=16002.9 err=100.0% to=550 pv/s=5.3 MB/s=0.0 cpu api=1.6 pg=0.0 gen=1.5 tot=4.4
+baseline/campus users=  400 rps=   23.2 p50=15816.6 p95=16002.6 p99=16005.7 err=100.0% to=1044 pv/s=10.4 MB/s=0.0 cpu api=2.7 pg=0.1 gen=2.3 tot=6.1
+baseline/spike users=   50 rps=    2.8 p50=15199.1 p95=15527.3 p99=15531.4 err=77.38% to=65 pv/s=0.8 MB/s=0.0 cpu api=1.6 pg=0.2 gen=1.1 tot=4.6
+recovery: {'recovered': True, 'seconds_after_load_stopped': 27.0}

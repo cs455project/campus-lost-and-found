@@ -1,0 +1,232 @@
+[
+ {
+  "id": "ADV-01",
+  "category": "Authentication",
+  "attack": "Guess the 6-digit sign-in code (5 wrong tries, then the right one)",
+  "expected": "Code locked after 5 wrong tries; even the right code then fails",
+  "actual": "wrong tries: [400, 400, 400, 400, 400]; right code afterwards: 400",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-02",
+  "category": "Authentication",
+  "attack": "Flood a mailbox by requesting codes repeatedly",
+  "expected": "Second request within 60 s refused (429)",
+  "actual": "202 then 429",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-03",
+  "category": "Authentication",
+  "attack": "Sign in with look-alike domains, a Cyrillic \u0456, an unknown Gmail, or email-header injection (newline + Bcc)",
+  "expected": "All refused (400/422); no email sent",
+  "actual": "400, 400, 400, 400, 422, 422, 422",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-04",
+  "category": "Authentication",
+  "attack": "Use a made-up or tampered session cookie",
+  "expected": "401 Not signed in",
+  "actual": "made-up: 401; one character changed: 401",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-05",
+  "category": "Authentication",
+  "attack": "Inspect the session cookie; reuse it after sign-out",
+  "expected": "HttpOnly + SameSite; token useless after logout (Secure flag comes from COOKIE_SECURE=true on the server)",
+  "actual": "flags: HttpOnly, SameSite=lax, Path=/; reuse after logout: 401",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-06",
+  "category": "Access control",
+  "attack": "Student calls security-staff endpoints directly",
+  "expected": "403 for every call",
+  "actual": "list staff desk: 403, receive item: 403, start review: 403, approve claim: 403, dispose item: 403",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-07",
+  "category": "Access control",
+  "attack": "Student calls admin endpoints to promote themselves",
+  "expected": "403",
+  "actual": "make self admin: 403, list staff: 403",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-08",
+  "category": "Access control",
+  "attack": "Mass assignment: send role=ADMIN, a new email, name and roll in a profile update",
+  "expected": "Role, email, name and roll number unchanged",
+  "actual": "role=STUDENT, email=attacker.adv@iitk.ac.in, name=Attacker Adv, roll=240002",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-09",
+  "category": "Access control",
+  "attack": "IDOR: change ids in the URL to read or change another student's items, claims, proofs and ID-card photos",
+  "expected": "403/404 for all 9 attempts, victim's data unchanged",
+  "actual": "read hidden found report: 404, read victim's claim: 404, download victim's proof image: 404, download ID-card photo: 404, edit victim's lost report: 403, close victim's lost report: 403, delete victim's found report: 404, withdraw victim's claim: 404, add photo to victim's report: 403",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-10",
+  "category": "Access control",
+  "attack": "Mass assignment on a new report (status, kind, reporter_id, id, ai_description)",
+  "expected": "Extra fields ignored",
+  "actual": "status=OPEN, kind=LOST, id=5",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-11",
+  "category": "Access control",
+  "attack": "Claim an item you found yourself; claim the same item twice",
+  "expected": "Own find refused; second open claim refused",
+  "actual": "own find: 400; first claim: 201; second: 409",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-12",
+  "category": "Injection",
+  "attack": "SQL injection in the search box (OR 1=1, DROP TABLE, UNION, pg_sleep)",
+  "expected": "200 with no extra rows, no delay, tables intact",
+  "actual": "\"' OR 1=1 --\": 200, 0 rows, 0.01 s; \"x'); DROP TABLE items; --\": 200, 0 rows, 0.01 s; \"headphones' UNION SELECT email FROM users --\": 200, 0 rows, 0.01 s; \"\\\\'; SELECT pg_sleep(5); --\": 200, 0 rows, 0.01 s; \"%' OR '%'='\": 200, 0 rows, 0.01 s; lost items before/after: 2/2",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-13",
+  "category": "Injection",
+  "attack": "Injection and abuse through other parameters (kind, category, id, page size)",
+  "expected": "422 validation errors or 0 results",
+  "actual": "kind=FOUND' OR '1'='1: 422, category=x' OR 1=1--: 0, item id 1 OR 1=1: 422, page_size=1000000: 422, page=-1: 422",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-14",
+  "category": "Injection",
+  "attack": "Stored XSS: script and onerror payloads in an item title and description, viewed by another student",
+  "expected": "Stored as plain text; nothing runs in the browser",
+  "actual": "stored as text: True; browser: NO_SCRIPT_RAN; payload shown as text: True",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-15",
+  "category": "File upload",
+  "attack": "Upload a web shell, SVG with script, renamed .exe, HTML, empty and oversized files",
+  "expected": "All rejected with 400",
+  "actual": "PHP web shell named .jpg: 400, SVG with script: 400, Windows .exe renamed: 400, HTML page: 400, empty file: 400, 6 MB file (limit 5 MB): 400",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-16",
+  "category": "File upload",
+  "attack": "Polyglot file (JPEG header + script/PHP) named ../../app/main.py",
+  "expected": "May be stored as an image, but under a random name and served as image/jpeg with nosniff, so it can't run",
+  "actual": "upload: 201; served as: image/jpeg; nosniff: nosniff",
+  "result": "PASS",
+  "severity": "",
+  "note": "Server never uses the uploaded file name; content-type comes from the magic bytes."
+ },
+ {
+  "id": "ADV-17",
+  "category": "File upload",
+  "attack": "Upload a phone photo with GPS location in its EXIF data; download it as another student",
+  "expected": "Location data removed before the photo is shared",
+  "actual": "GPS still in the downloaded photo: False",
+  "result": "PASS",
+  "severity": "",
+  "note": "Finders' photos are shown to every student once the item is at an office."
+ },
+ {
+  "id": "ADV-18",
+  "category": "File upload",
+  "attack": "Decompression bomb: a 136 KB PNG that is 12,000 \u00d7 12,000 pixels",
+  "expected": "Refused by a pixel limit, or processed in bounded memory",
+  "actual": "upload: 400; memory it would need to decode if accepted: 781 MB",
+  "result": "PASS",
+  "severity": "",
+  "note": "The AI photo step (AI_PHOTO_DESCRIPTIONS, on in production) decodes the full image; a few such uploads can exhaust a 2 GB server."
+ },
+ {
+  "id": "ADV-19",
+  "category": "Hardening",
+  "attack": "Check the website's security headers (clickjacking, sniffing, CSP)",
+  "expected": "CSP or X-Frame-Options, nosniff and Referrer-Policy set; no X-Powered-By",
+  "actual": "missing: none; X-Powered-By: None",
+  "result": "PASS",
+  "severity": "",
+  "note": "HSTS is added by Caddy only if configured; the deploy Caddyfile doesn't set it."
+ },
+ {
+  "id": "ADV-20",
+  "category": "Hardening",
+  "attack": "Cross-origin request from another website (CORS)",
+  "expected": "Other origins not allowed",
+  "actual": "Access-Control-Allow-Origin for evil.example: None",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-21",
+  "category": "Hardening",
+  "attack": "Look for public API documentation",
+  "expected": "Docs disabled in production",
+  "actual": "/docs: 404, /openapi.json: 404, /redoc: 404",
+  "result": "PASS",
+  "severity": "",
+  "note": "Reachable on the live site at /api/docs and /api/openapi.json; lists every endpoint."
+ },
+ {
+  "id": "ADV-22",
+  "category": "Hardening",
+  "attack": "Send malformed input to provoke error pages",
+  "expected": "Short error messages, no stack traces or internals",
+  "actual": "broken JSON: 422, unknown route: 404, wrong type: 422; internals leaked: False",
+  "result": "PASS",
+  "severity": "",
+  "note": ""
+ },
+ {
+  "id": "ADV-23",
+  "category": "Authentication",
+  "attack": "Online brute force against a real account with 30 rapid code guesses (no code requested)",
+  "expected": "Every guess refused; no sign-in",
+  "actual": "30 guesses in 0.4 s; statuses: [400]",
+  "result": "PASS",
+  "severity": "",
+  "note": "There is no per-IP rate limit; each code allows only 5 tries and expires in 10 minutes, so guessing stays impractical."
+ }
+]

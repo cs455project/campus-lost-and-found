@@ -13,11 +13,22 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
 
+_settings = get_settings()
+
 engine = create_engine(
-    get_settings().database_url,
+    _settings.database_url,
     # Check a connection still works before using it (e.g. after the
     # database restarted), instead of failing the request.
     pool_pre_ping=True,
+    # Enough connections for every request the API works on at once
+    # (api_max_in_flight, enforced in main.py), plus a few for the AI runner
+    # and start-up. 10 stay open; the others open when needed and close
+    # when the rush is over. Without this, a busy API could deadlock: every
+    # worker thread waiting for a connection, while the requests holding the
+    # connections waited for a free thread (load test, Nov 2026).
+    pool_size=10,
+    max_overflow=max(0, _settings.api_max_in_flight + 5 - 10),
+    pool_timeout=10,
 )
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)

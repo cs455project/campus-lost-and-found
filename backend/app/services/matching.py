@@ -188,12 +188,19 @@ def similar_items(db: Session, item: Item, limit: int = MAX_RESULTS) -> dict:
 
 
 def notify_saved(db: Session, item: Item) -> None:
-    """Tell the matcher an item was created or changed. Never fails the
-    caller: a report is saved even if the matcher is down."""
+    """Tell the matcher an item was created or changed, then commit. Never
+    fails the caller: a report is saved even if the matcher is down.
+
+    The matcher's work (queueing the AI job) runs in a savepoint and is
+    committed TOGETHER with the caller's unsaved changes, so a crash can't
+    leave a new report without its AI job (failure test FR-04); if the
+    matcher fails, only its part is undone."""
     try:
-        get_matcher().item_saved(db, item)
+        with db.begin_nested():
+            get_matcher().item_saved(db, item)
     except Exception:
         log.exception("Matcher could not process item %s", item.id)
+    db.commit()
 
 
 def notify_removed(item_id: int) -> None:

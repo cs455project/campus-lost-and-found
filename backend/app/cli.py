@@ -75,6 +75,23 @@ def make_admin(raw_email: str) -> None:
     print(f"{email} is now the admin. They can sign in with that email.")
 
 
+def set_office(name: str, where: str | None, hours: str | None, phone: str | None) -> None:
+    """Set an office's directions, hours or phone, as students see them on
+    the site and in emails."""
+    with SessionLocal() as db, db.begin():
+        office = db.scalar(select(Office).where(Office.name.ilike(name.strip())))
+        if office is None:
+            names = ", ".join(db.scalars(select(Office.name).order_by(Office.name)))
+            raise AppError(404, f"No office called {name!r}. Offices: {names}")
+        if where is not None:
+            office.location_description = where.strip()[:255]
+        if hours is not None:
+            office.opening_hours = hours.strip()[:100]
+        if phone is not None:
+            office.contact_phone = phone.strip()[:20] or None
+        print(f"{office.name}: {office.place()}" + (f", phone {office.contact_phone}" if office.contact_phone else ""))
+
+
 DEMO_ITEMS = [
     ("Black backpack", "bags", "Black", "Wildcraft", "Lecture Hall Complex, L7", "Laptop sleeve inside, keychain on the zip."),
     ("Blue water bottle", "water-bottles", "Blue", "Milton", "Sports complex, badminton court", "Steel bottle with a dent near the cap."),
@@ -437,6 +454,11 @@ def main() -> None:
     check_cmd.add_argument("item", help="e.g. 735 or FND-0735")
     mail_cmd = commands.add_parser("email-test", help="send sample emails to check the email settings")
     mail_cmd.add_argument("to")
+    office_cmd = commands.add_parser("set-office", help="set an office's directions, hours or phone")
+    office_cmd.add_argument("name", help='e.g. "Main Security Office"')
+    office_cmd.add_argument("--where", help="directions students can follow")
+    office_cmd.add_argument("--hours", help='e.g. "24 hours"')
+    office_cmd.add_argument("--phone")
     ocr_cmd = commands.add_parser("ocr-check", help="read an ID card photo and show the owner it finds")
     ocr_cmd.add_argument("path", help="an image file, or an item number")
 
@@ -458,6 +480,8 @@ def main() -> None:
             item_check(args.item)
         elif args.command == "email-test":
             email_test(args.to)
+        elif args.command == "set-office":
+            set_office(args.name, args.where, args.hours, args.phone)
         elif args.command == "ocr-check":
             ocr_check(args.path)
     except AppError as error:

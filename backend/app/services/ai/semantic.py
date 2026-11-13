@@ -247,8 +247,7 @@ class SemanticMatcher:
         """Queue (re)analysis. Called after a report is created or edited,
         a photo changes, or a guard receives the item."""
         queue.enqueue(db, JOB_KIND, item.id)
-        item.ai_status = "pending"
-        db.commit()
+        item.ai_status = "pending"  # committed by matching.notify_saved
 
     def item_removed(self, item_id: int) -> None:
         pass  # suggestions and jobs are deleted with the item (ON DELETE CASCADE)

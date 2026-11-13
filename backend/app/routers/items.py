@@ -4,14 +4,16 @@ Every endpoint needs a signed-in user who has completed their profile
 (OnboardedUser). The rules themselves live in services/items.py.
 """
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, File, Query, UploadFile, status
 from fastapi.responses import FileResponse
+from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 
 from app.core.deps import DbSession, OnboardedUser
 from app.core.errors import forbidden, not_found
-from app.models import ItemKind, ItemPhoto
+from app.models import Item, ItemKind, ItemPhoto
 from app.schemas.item import (
     CloseLostIn,
     DropoffOfficeIn,
@@ -133,10 +135,12 @@ def close_lost(item_id: int, data: CloseLostIn, user: OnboardedUser, db: DbSessi
 
 
 @router.post("/{item_id}/photos", response_model=ItemDetailOut, status_code=status.HTTP_201_CREATED)
-async def upload_photo(item_id: int, user: OnboardedUser, db: DbSession, file: UploadFile = File()):
-    """Add one photo (JPEG, PNG or WebP). Call once per photo."""
+def upload_photo(item_id: int, user: OnboardedUser, db: DbSession, file: UploadFile = File()):
+    """Add one photo (JPEG, PNG or WebP). Call once per photo.
+    A plain `def`: it uses the database, so it must run in a worker thread
+    (see storage.read_image)."""
     item = items_service.get_visible_item(db, item_id, user)
-    data, content_type, extension = await storage.read_image(file)
+    data, content_type, extension = storage.read_image(file)
     items_service.add_photo(db, item, user, data, content_type, extension)
     return items_service.detail_for(db, item, user)
 
@@ -150,15 +154,38 @@ def delete_photo(item_id: int, photo_id: int, user: OnboardedUser, db: DbSession
 
 
 @router.get("/{item_id}/photos/{photo_id}")
-def get_photo(item_id: int, photo_id: int, user: OnboardedUser, db: DbSession):
+def get_photo(
+    item_id: int,
+    photo_id: int,
+    user: OnboardedUser,
+    db: DbSession,
+    size: Annotated[Literal["full", "thumb"], Query(description="thumb = small copy for lists")] = "full",
+):
     """Photos are served through the API (not as public files), so the same
-    "who may see this item" rule applies to its photos."""
-    item = items_service.get_visible_item(db, item_id, user)
-    photo = db.get(ItemPhoto, photo_id)
-    if photo is None or photo.item_id != item.id or not items_service.photos_visible(item, user):
+    "who may see this item" rule applies to its photos.
+    ?size=thumb gives a small WebP copy (about 640 px) for the lists."""
+    # One query for the photo, its item and the item's category (the
+    # category decides whether the photos are private).
+    photo = db.scalar(
+        select(ItemPhoto)
+        .where(ItemPhoto.id == photo_id, ItemPhoto.item_id == item_id)
+        .options(joinedload(ItemPhoto.item).joinedload(Item.category))
+    )
+    if photo is None:
+        items_service.get_visible_item(db, item_id, user)  # 404 for the item first, as before
         raise not_found("No photo with that number.")
+    item = photo.item
+    if not items_service.can_view(item, user):
+        raise not_found("No item with that number.")
+    if not items_service.photos_visible(item, user):
+        raise not_found("No photo with that number.")
+    # private: the browser may cache it, but shared caches must not.
+    headers = {"Cache-Control": "private, max-age=3600"}
+    if size == "thumb":
+        thumb = storage.make_thumbnail(photo.stored_name)
+        if thumb is not None:
+            return FileResponse(thumb, media_type="image/webp", headers=headers)
     path = storage.path_for(photo.stored_name)
     if not path.exists():
         raise not_found("The photo file is missing.")
-    # private: the browser may cache it, but shared caches must not.
-    return FileResponse(path, media_type=photo.content_type, headers={"Cache-Control": "private, max-age=3600"})
+    return FileResponse(path, media_type=photo.content_type, headers=headers)

@@ -18,6 +18,7 @@ EMAIL_BACKEND=smtp: really sent, e.g. through Gmail:
 import logging
 import re
 import smtplib
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from email.message import EmailMessage
@@ -182,18 +183,39 @@ def send(to: str, mail: Email) -> None:
         if not (settings.smtp_host and settings.smtp_user and settings.smtp_password):
             raise EmailNotSent("EMAIL_BACKEND=smtp needs SMTP_HOST, SMTP_USER and SMTP_PASSWORD in backend/.env")
         message = build_message(to, mail)
-        try:
-            # timeout: don't let a slow mail server freeze the request forever.
-            with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=20) as server:
-                server.starttls()  # encrypt the connection before logging in
-                server.login(settings.smtp_user, settings.smtp_password)
-                server.send_message(message)
-        except (smtplib.SMTPException, OSError) as error:
-            raise EmailNotSent(f"{type(error).__name__}: {error}") from error
+        attempts = 1 + max(0, settings.email_retries)
+        for attempt in range(1, attempts + 1):
+            try:
+                _deliver(message)
+                break
+            except (smtplib.SMTPException, OSError) as error:
+                if attempt == attempts or not _temporary(error):
+                    raise EmailNotSent(f"{type(error).__name__}: {error}") from error
+                log.warning("Email to %s failed (%s), trying again (%d of %d)", to, type(error).__name__,
+                            attempt + 1, attempts)
+                time.sleep(settings.email_retry_seconds * attempt)
     except EmailNotSent as error:
         _record(to, mail, "failed", str(error))
         raise
     _record(to, mail, "sent")
+
+
+def _deliver(message: EmailMessage) -> None:
+    settings = get_settings()
+    # timeout: don't let a slow mail server freeze the request forever.
+    with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=20) as server:
+        server.starttls()  # encrypt the connection before logging in
+        server.login(settings.smtp_user, settings.smtp_password)
+        server.send_message(message)
+
+
+def _temporary(error: Exception) -> bool:
+    """Worth trying again? A dropped or refused connection, a timeout, or a
+    4xx reply ("try again later", as Gmail sends when busy) usually passes on
+    the next try. A wrong password (535) or a refused address won't."""
+    if isinstance(error, smtplib.SMTPResponseException):
+        return 400 <= error.smtp_code < 500
+    return isinstance(error, (smtplib.SMTPServerDisconnected, smtplib.SMTPConnectError, OSError))
 
 
 def safe_subject(mail: Email) -> str:

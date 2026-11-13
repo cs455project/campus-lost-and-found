@@ -84,7 +84,7 @@ def send_dropoff_reminders(db: Session, at: datetime) -> int:
             item.reporter.email,
             "Reminder: please hand in the item you found",
             f"You reported finding \"{item.title}\" ({item.ref}), but it hasn't been handed in yet.\n\n"
-            f"Please take it to {office.name} ({office.location_description}; open {office.opening_hours}).\n"
+            f"Please take it to {office.place()}.\n"
             "Until a guard receives it, the owner can't see it on the Found page.",
         )
     return len(items)
@@ -108,8 +108,8 @@ def send_collect_reminders(db: Session, at: datetime) -> int:
             claim.claimant.email,
             "Reminder: collect your item",
             f"Your claim {claim.ref} for \"{claim.item.title}\" was approved, but the item hasn't been "
-            f"collected yet.\n\nCollect it from {office.name} ({office.location_description}; open "
-            f"{office.opening_hours}) by {_when(claim.collect_by)}, with your student ID card.\n"
+            f"collected yet.\n\nCollect it from {office.place()} by {_when(claim.collect_by)}, "
+            "with your student ID card.\n"
             "After that the approval expires.",
         )
     return len(claims)

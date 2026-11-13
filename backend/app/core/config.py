@@ -59,6 +59,19 @@ class Settings(BaseSettings):
     upload_dir: Path = BACKEND_DIR / "uploads"
     max_photos_per_item: int = 3
     max_photo_mb: int = 5
+    # Larger images are refused (a 48-megapixel phone photo is fine).
+    max_photo_megapixels: int = 60
+
+    # The interactive API docs (/docs, /redoc, /openapi.json). Off in production.
+    api_docs: bool = True
+
+    # ---- Capacity (see testing/perf/README.md) ----
+    # At most this many requests are worked on at once in each API process;
+    # the rest wait their turn (up to api_queue_seconds, then "server busy").
+    # The database pool always has a connection for each of them, so a
+    # request never waits for a connection while holding a thread.
+    api_max_in_flight: int = 30
+    api_queue_seconds: float = 20.0
 
     # ---- Email ----
     email_backend: Literal["console", "smtp"] = "console"
@@ -67,6 +80,10 @@ class Settings(BaseSettings):
     smtp_user: str = ""
     smtp_password: str = ""
     email_from: str = ""
+    # A dropped connection or a "try again later" reply is retried this many
+    # times, waiting email_retry_seconds, then twice that, between tries.
+    email_retries: int = 2
+    email_retry_seconds: float = 2.0
     # The portal's name, used in emails and page titles.
     portal_name: str = "TraceBack"
     portal_tagline: str = "IIT Kanpur Lost & Found"
@@ -92,8 +109,17 @@ class Settings(BaseSettings):
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_cache_dir: Path = BACKEND_DIR / ".cache" / "models"
 
-    # Agent's language model (Phase B): Groq first, Gemini as the fallback.
-    # Both speak the same OpenAI-style API. Keys only in .env, never in code.
+    # Language models, tried in this order on every call (agent, photo
+    # descriptions, assistant): OpenAI, then Gemini, then Groq. A provider
+    # without a key is skipped. All three speak the OpenAI-style API.
+    # Keys only in .env, never in code.
+    openai_api_key: str = ""
+    openai_model: str = "gpt-5-mini"
+    openai_base_url: str = "https://api.openai.com/v1"
+    # OpenAI reasoning models only allow tool calling in chat completions
+    # with reasoning switched off ("none"). Models that don't know the
+    # setting are retried without it. Empty = never send it.
+    openai_reasoning_effort: str = "none"
     llm_base_url: str = "https://api.groq.com/openai/v1"
     llm_api_key: str = ""  # your Groq key
     llm_model: str = "openai/gpt-oss-20b"
@@ -104,12 +130,25 @@ class Settings(BaseSettings):
     # fallback brain above. Pick a free Flash model shown in AI Studio.
     gemini_api_key: str = ""
     gemini_model: str = "gemini-2.5-flash"
+    # The help assistant in the sidebar (same providers, same daily limit).
+    assistant_enabled: bool = True
+    assistant_messages_per_hour: int = 30   # per signed-in user
+    assistant_max_turns: int = 4            # LLM rounds per question, at most
     # When the AI agent ranks matches (the maths always runs first):
     #   off        never: rule-based matching only (no LLM calls)
     #   ambiguous  only when the maths isn't sure (close scores, or a top
     #              score in the uncertain range). Saves most LLM calls.
     #   always     every report (e.g. for a demo)
     agent_matching: Literal["off", "ambiguous", "always"] = "ambiguous"
+    # The agent's limits (were constants in services/ai/agent.py):
+    agent_max_turns: int = 6             # LLM rounds per report, at most
+    agent_max_candidates: int = 12       # candidates one search can return
+    agent_notify_min_score: float = 0.7  # the agent may email the owner from this score
+    rule_notify_min_score: float = 0.8   # without the agent: only very clear matches
+    # "ambiguous" mode asks the agent when the best two scores are this close,
+    agent_close_scores: float = 0.10
+    # or the best score is below this (but above the minimum).
+    agent_unsure_below: float = 0.65
     # Phase C: Gemini describes item photos (once per set of photos).
     ai_photo_descriptions: bool = True
     # Category slugs whose photos are NEVER sent to an AI service (personal data).
